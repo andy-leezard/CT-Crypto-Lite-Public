@@ -11,7 +11,8 @@ Admob ID and Firebase API have been removed from this repository which does not,
 Updates will not necessarily be pushed immediately to this repository.
 The whole point is to share some of its source code for educational and personal purposes.
 
-License & intellectual property : before harnessing my open source code written with hard work, please notice the applied license ( AGPL-3.0 License ). In case of any legal consequence occurred, especially by neglecting this warning, the charged will be entirely held responsable.
+License & intellectual property : before harnessing my open source code written with hard work, please notice the applied license ( GNU Affero General Public License v3.0 ).
+In case of any legal consequence occurred, especially by neglecting this warning, the charged will be entirely held responsable.
 
 ![Screenshot1](https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/Screenshot_1.png?alt=media&token=0f4a1849-ff7b-4c75-9665-36c0ab0b4811)
 ![Screenshot2](https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/Screenshot_2.png?alt=media&token=02ed1b55-65a7-4083-8301-de931fe9aca3)
