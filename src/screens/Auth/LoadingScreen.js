@@ -1,5 +1,5 @@
 import React from 'react'
-import { StyleSheet, Text, SafeAreaView, Image } from 'react-native'
+import { StyleSheet, Text, SafeAreaView, Image, Platform } from 'react-native'
 import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from "react-native-appearance";
 import Env from '../../env.json';
@@ -19,7 +19,7 @@ const LoadingScreen = () => {
             <StatusBar style="auto"/>
                 <Image
                     source={require('../../assets/icon.png')}
-                    style={{width:40,height:40,marginBottom:5,marginTop:100,}}
+                    style={[{width:40,height:40,marginBottom:5,marginTop:100,},(Platform.OS === 'ios') && {borderRadius:5}]}
                 />
                 <Text style={{color:brandTextColor(),fontSize:20,fontWeight:"bold"}}>CoinTracer</Text>
         </SafeAreaView>

@@ -31,7 +31,7 @@ const ApprovalScreen = ({navigation}) => {
               <View>
                 <Image
                   source={require('../../assets/icon.png')}
-                  style={{width:40,height:40,marginBottom:5,marginTop:20,}}
+                  style={[{width:40,height:40,marginBottom:5,marginTop:20,},(Platform.OS === 'ios') && {borderRadius:5}]}
                 />
               </View>
               <Text style={{color:brandTextColor(),marginBottom:20,fontSize:20,fontWeight:"bold"}}>CoinTracer</Text>

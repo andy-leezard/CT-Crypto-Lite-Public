@@ -16,11 +16,12 @@ import * as firebase from "firebase";
 
 const Tab = createBottomTabNavigator();
 
-const android_banner = "android_banner_id";
-const ios_banner = "ios_banner_id";
+const android_banner = "ca-app-pub-2294308974784218/5447463023";
+const ios_banner = "ca-app-pub-2294308974784218/9054168564";
 
 const android_banner_test = "ca-app-pub-3940256099942544/6300978111";
 const ios_banner_test = "ca-app-pub-3940256099942544/2934735716";
+const bool_AD_is_test = true;
 
 const MainController = ({coindata, userEmail, changedata}) => {
     const scheme = useColorScheme();
@@ -34,21 +35,22 @@ const MainController = ({coindata, userEmail, changedata}) => {
     const [totalbuyin_const, setTotalbuyin_const] = useState();
     const [pnldate, setPNLdate] = useState();
     
-    const [nameOnly, setNameOnly] = useState(['VUSD']);
     const [postData, setPostData] = useState([]);
     const [fav, setFav] = useState([]);
     const [boughtPro, setBoughtPro] = useState();
+    const ref = db.collection('users').doc(userEmail);
 
     useEffect(() => {
-        const ref = db.collection('users').doc(userEmail);
         ref.update({lastActicity:firebase.firestore.FieldValue.serverTimestamp()}).catch((err)=>{console.log(err);})
         const unsubscribe = ref.onSnapshot((doc)=>{
-            setPincode(doc.data().pin);console.log("pin : "+doc.data().pin);
+            const thepin = doc.data().pin ?? "error";
+            (thepin!=="error") && setPincode(thepin);
+            console.log("pin : "+thepin);
             console.log("snapshot triggered at",new Date().toLocaleString());
             setUsername(doc.data().username);
             setRequirePIN(doc.data().requirepin);
             const theseed = doc.data().seed;
-            setSeed(doc.data().seed);
+            setSeed(theseed);
             setProversion(doc.data().pro);
             setBoughtPro(doc.data().boughtPro);
             setFav(doc.data().favorites);
@@ -69,7 +71,6 @@ const MainController = ({coindata, userEmail, changedata}) => {
                       //let postData = _.cloneDeep(postData_local);
                       postData_local.push({quantity:theseed,id:'vusd'});
                       setPostData(postData_local);
-                      setNameOnly(nameOnly_local);
                   })
         });
         return unsubscribe;
@@ -115,7 +116,7 @@ const MainController = ({coindata, userEmail, changedata}) => {
                 <View>
                     <Image
                     source={require('../../assets/icon.png')}
-                    style={{width:40,height:40}}
+                    style={[{width:40,height:40},(Platform.OS === 'ios') && {borderRadius:5}]}
                     />
                 </View>
                 <Text style={{color:focusedColor(),marginBottom:40,fontSize:20,fontWeight:"bold"}}>CoinTracer</Text>
@@ -143,7 +144,7 @@ const MainController = ({coindata, userEmail, changedata}) => {
         )
     }
 
-    if(nameOnly.length!==postData.length){
+    if(postData.length<1){
       return(
         <LoadingScreen/>
       )
@@ -166,7 +167,7 @@ const MainController = ({coindata, userEmail, changedata}) => {
         <Tab.Screen
           name="Prices"
           //component={PricesScreen}
-          children={()=><PricesScreen userEmail={userEmail} fav={fav} coindata={coindata} changeData={changedata} ispro={proversion} bannerID={bannerAdId(true)} upgraded={boughtPro}/>}
+          children={()=><PricesScreen userEmail={userEmail} fav={fav} coindata={coindata} changeData={changedata} ispro={proversion} bannerID={bannerAdId(bool_AD_is_test)} upgraded={boughtPro}/>}
           options={{
             tabBarIcon:({ focused }) => (
               <View style={{alignItems: "center", justifyContent: "center",width:40}}>
@@ -190,7 +191,7 @@ const MainController = ({coindata, userEmail, changedata}) => {
         />
         <Tab.Screen
           name="Portfolio" //component={TradingScreen}
-          children={()=><PortfolioScreen userEmail={userEmail} username={username} nameOnly={nameOnly} seed={seed} coindata={coindata} postData={postData} totalbuyin={totalbuyin} totalbuyin_const={totalbuyin_const} pnldate={pnldate} ispro={proversion} bannerID={bannerAdId(true)} upgraded={boughtPro}/>}
+          children={()=><PortfolioScreen userEmail={userEmail} username={username} seed={seed} coindata={coindata} postData={postData} totalbuyin={totalbuyin} totalbuyin_const={totalbuyin_const} pnldate={pnldate} ispro={proversion} bannerID={bannerAdId(bool_AD_is_test)} upgraded={boughtPro}/>}
           options={{
             tabBarIcon: ({ focused }) => (
               <View style={{ alignItems: "center", justifyContent: "center"}}>
@@ -209,7 +210,7 @@ const MainController = ({coindata, userEmail, changedata}) => {
         />
         <Tab.Screen
           name="Settings" //component={PortfolioScreen}
-          children={()=><SettingsScreen userEmail={userEmail} username={username} requirePIN={requirePIN} ispro={proversion} bannerID={bannerAdId(true)} boughtPro={boughtPro}/>}
+          children={()=><SettingsScreen userEmail={userEmail} username={username} requirePIN={requirePIN} ispro={proversion} bannerID={bannerAdId(bool_AD_is_test)} boughtPro={boughtPro}/>}
           options={{
             tabBarIcon:({ focused }) => (
               <View style={{alignItems: "center", justifyContent: "center",width:40}}>

@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity, Dimensions, Platform, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-//import { AdMobBanner} from 'expo-ads-admob';
+import { AdMobBanner} from 'expo-ads-admob';
 import { PieChart } from "react-native-chart-kit";
 import _ from 'lodash';
 import { useColorScheme } from "react-native-appearance";
@@ -53,13 +53,12 @@ const Portfolio = ({username, userEmail, portfolio, ispro, bannerID, upgraded}) 
     const sellColor = () => {
         return bool_isDarkMode() ? Env.sellColor_dark:Env.sellColor_light;
     }
-    const dynamicMargin = () => {
-        return (Platform.OS === 'ios') ? 150:95;
-        /*if(noAd){
+    const dynamicMargin = (noAd) => {
+        if(noAd){
             return (Platform.OS === 'ios') ? 150:95;
         }else{
             return (Platform.OS === 'ios') ? 215:155;
-        }*/
+        }
     }
     const avoidDuplicate = (d) => Object.values(d).reduce((r, i) => !~r.indexOf(i) ? (r.push(i), r) : r , []);
 
@@ -259,14 +258,14 @@ const Portfolio = ({username, userEmail, portfolio, ispro, bannerID, upgraded}) 
                 </ScrollView>
             </View>
             <View style={{alignSelf:"center"}}>
-                {/*!ispro && 
+                {!ispro && 
                     <AdMobBanner
                     bannerSize="fullBanner"
                     adUnitID={bannerID} // Test ID, Replace with your-admob-unit-id
                     servePersonalizedAds // true or false
                     //onDidFailToReceiveAdWithError={this.bannerError}
                     />
-                */}
+                }
             </View>
             </View>
         </SafeAreaView>

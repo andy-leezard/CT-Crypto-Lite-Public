@@ -3,7 +3,7 @@ import { View, Text, Image, StyleSheet, TouchableOpacity, Dimensions, TextInput,
 import { db } from '../../firebase';
 import { Button } from 'react-native-elements';
 import Slider from "@brlja/react-native-slider";
-//import AdMobRewardedComponent from './AdMobRewardedComponent';
+import AdMobRewardedComponent from './AdMobRewardedComponent';
 import { useColorScheme } from "react-native-appearance";
 import Env from '../env.json';
 
@@ -11,7 +11,6 @@ const width = Dimensions.get("window").width-20;
 const actionListTab = [
     {action: "Buy",/*1h = hour*/},{action: "Sell",/*1h = hour*/}
 ];
-
 
 const Trader = ({coinname,user,coinprice,coinsymbol,coinIcon,upgraded}) => {
     const [quantity, setquantity] = useState(0);
@@ -585,7 +584,7 @@ const Trader = ({coinname,user,coinprice,coinsymbol,coinIcon,upgraded}) => {
                     <Text style={{fontSize:15,fontWeight:"bold",color:subTextColor(),marginRight:5,textAlign:"right"}}>= {dynamicRound((seed/coinprice),2)} {coinsymbol}</Text>
                 </View>
             </View>
-            {/*<AdMobRewardedComponent user={user} width={width} renderThis={true}/>*/}
+            {<AdMobRewardedComponent user={user} width={width}/>}
             <View style={{flexDirection:"row",justifyContent:"space-between",backgroundColor:containerColor_secondary(),borderRadius:5,width:width,marginBottom:5,height:35}}>
                 {actionListTab.map((e) => (
                 <TouchableOpacity key={e.action} style={[styles.action_tab, (action===e.action&&e.action==="Sell")&&{backgroundColor:sellColor()}, (action===e.action&&e.action==="Buy")&&{backgroundColor:buyColor()}]} onPress={()=>setActionFilter(e.action)}>

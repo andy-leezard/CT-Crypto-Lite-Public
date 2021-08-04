@@ -3,7 +3,7 @@ import { View, Text, Image, ScrollView, Alert, StyleSheet, TouchableOpacity, Swi
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { db, auth } from '../../firebase';
 import { useColorScheme } from "react-native-appearance";
-//import { AdMobBanner} from 'expo-ads-admob';
+import { AdMobBanner} from 'expo-ads-admob';
 import { useNavigation } from '@react-navigation/core';
 
 const screenHeight = Dimensions.get("window").height;
@@ -32,12 +32,11 @@ const Settings = ({userEmail,username,requirePIN,ispro,bannerID,boughtPro}) => {
         return bool_isDarkMode() ? "#b5b5b5":"#757575";
     }
     const dynamicMargin = () => {
-        return (Platform.OS === "ios") ? 200:130;
-        /*if(!ispro){
+        if(!ispro){
             return (Platform.OS === "ios") ? 300:230;
         }else{
             return (Platform.OS === "ios") ? 200:130;
-        }*/
+        }
     }
 
     const firebaseSignOut = () => {
@@ -200,14 +199,14 @@ const Settings = ({userEmail,username,requirePIN,ispro,bannerID,boughtPro}) => {
             </ScrollView>
             </View>
             <View style={{alignSelf:"center"}}>
-                {/*!ispro && 
+                {!ispro && 
                     <AdMobBanner
                     bannerSize="fullBanner"
                     adUnitID={bannerID} // Test ID, Replace with your-admob-unit-id
                     servePersonalizedAds // true or false
                     //onDidFailToReceiveAdWithError={this.bannerError}
                     />
-                */}
+                }
             </View>
     </SafeAreaView>
     )

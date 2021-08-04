@@ -8,7 +8,7 @@ import Env from '../env.json';
 import { db } from '../../firebase';
 import { useColorScheme } from "react-native-appearance";
 import { useNavigation } from '@react-navigation/core';
-//import { AdMobBanner } from 'expo-ads-admob';
+import { AdMobBanner} from 'expo-ads-admob';
 
 const initialLimit = 20;
 
@@ -109,16 +109,15 @@ const Prices = ({userEmail,fav,coindata,changeData,ispro,bannerID,upgraded}) => 
     }
 
     const isInFavorite = (name) => {
-        if(fav.some(item => item === name)){return true}else{return false}
+        return fav.some(item => item === name);
     }
 
     const dynamicMargin = () => {
-        return (Platform.OS === "ios") ? 241:290;
-        /*if(Platform.OS === "ios"){
+        if(Platform.OS === "ios"){
             return (ispro) ? 241:403;
         }else{
             return (ispro) ? 290:348;
-        }*/
+        }
     }
 
     function removeItemOnce(arr, value) {
@@ -146,32 +145,18 @@ const Prices = ({userEmail,fav,coindata,changeData,ispro,bannerID,upgraded}) => 
     }
 
     const DataIntervalOptions = () => {
-        if(!heretoDatainterval){
-            return(
-                <ScrollView style={{flexDirection:"row"}} horizontal={true}>
-                    <Text style={{color:textColor(),fontWeight:"600",fontSize:16,textAlign:"left"}}>
-                        In the past
+        return(
+            <ScrollView style={{flexDirection:"row"}} horizontal={true}>
+                <Text style={{color:textColor(),fontWeight:"600",fontSize:16,textAlign:"left"}}>
+                    In the past
+                </Text>
+                <Text> </Text>
+                <TouchableOpacity style={{backgroundColor:"#428b8f",borderRadius:3,paddingHorizontal:5}} onPress={()=>toggleRenderDataInterval()}>
+                    <Text style={{color:"white",fontWeight:"bold",fontSize:15,textAlign:"left"}}>
+                        {ParseInterval(datainterval)}
                     </Text>
-                    <Text> </Text>
-                    <TouchableOpacity style={{backgroundColor:"#468559",borderRadius:5,paddingHorizontal:5}} onPress={()=>toggleRenderDataInterval()}>
-                        <Text style={{color:"white",fontWeight:"bold",fontSize:15,textAlign:"left"}}>
-                            {ParseInterval(datainterval)}
-                        </Text>
-                    </TouchableOpacity>
-                </ScrollView>
-            )
-        }else{
-            return(
-                <ScrollView style={{flexDirection:"row"}} horizontal={true}>
-                    <Text style={{color:textColor(),fontWeight:"600",fontSize:16,textAlign:"left"}}>
-                        In the past
-                    </Text>
-                    <Text> </Text>
-                    <TouchableOpacity style={{backgroundColor:"#468559",borderRadius:5,paddingHorizontal:5}} onPress={()=>toggleRenderDataInterval()}>
-                        <Text style={{color:"white",fontWeight:"bold",fontSize:15,textAlign:"left"}}>
-                            {ParseInterval(datainterval)}
-                        </Text>
-                    </TouchableOpacity>
+                </TouchableOpacity>
+                {(heretoDatainterval)&&(
                     <View  style={{flexDirection:"row",justifyContent:"space-between",backgroundColor:intervalContainerColor(),borderRadius:5,marginLeft:5}}>
                         {dataIntervalListTab.map((e) => (
                             <TouchableOpacity key={e.interval} style={[styles.interval_btnTab, (datainterval===e.interval && bool_isDarkMode())&&{backgroundColor:"#ffffff"},(datainterval===e.interval && !bool_isDarkMode())&&{backgroundColor:"#2294DB"}]} onPress={()=>setIntervalFilter(e.interval)}>
@@ -180,9 +165,9 @@ const Prices = ({userEmail,fav,coindata,changeData,ispro,bannerID,upgraded}) => 
                         
                         ))}
                     </View>
-                </ScrollView>
-            )
-        }
+                )}
+            </ScrollView>
+        )
     }
 
     const ParseChangeByInterval = (i) => {
@@ -243,21 +228,10 @@ const Prices = ({userEmail,fav,coindata,changeData,ispro,bannerID,upgraded}) => 
             activeColor24price = sellColor();
         }
 
-        if(status==="Market Cap"){
-            return(
-                <View style={{width:80}}>
-                    <Text style={{color:activeColor24price,fontSize:17,fontWeight:"bold",textAlign:"right"}}>{vol_str}</Text>
-                    <Text style={{color:textColor(),fontSize:12,fontWeight:"bold",color:activeColor24price,textAlign:"right"}}>{asString24price}</Text>
-                </View>
-            )
-        }else{
-            return (
-                <View style={{width:80}}>
-                    <Text style={{color:activeColor24price,fontSize:14,fontWeight:"bold",textAlign:"right"}}>{prix}</Text>
-                    <Text style={{color:textColor(),fontSize:12,fontWeight:"bold",color:activeColor24price,textAlign:"right"}}>{asString24price}</Text>
-                </View>
-            )
-        }
+        return(<View style={{width:135}}>
+            <Text style={{color:activeColor24price,fontSize:17,fontWeight:"bold",textAlign:"right"}}>{(status==="Market Cap") ? vol_str:prix}</Text>
+            <Text style={{color:textColor(),fontSize:12,fontWeight:"bold",color:activeColor24price,textAlign:"right"}}>{asString24price}</Text>
+        </View>)
     }
 
     const RenderByOption = () => {
@@ -324,7 +298,7 @@ const Prices = ({userEmail,fav,coindata,changeData,ispro,bannerID,upgraded}) => 
                 <TouchableOpacity style={{alignItems:"center"}} onPress={()=>tryrefresh()}>
                     <Image
                         source={require('../assets/icon.png')}
-                        style={{width:25,height:25,marginBottom:5,marginTop:-5,}}
+                        style={[{width:25,height:25,marginBottom:5,marginTop:-5,},(Platform.OS === 'ios') && {borderRadius:5}]}
                     />
                     <Text style={{color:brandTextColor(),marginBottom:5,fontSize:10,fontWeight:"bold"}}>CoinTracer</Text>
                 </TouchableOpacity>
@@ -358,7 +332,7 @@ const Prices = ({userEmail,fav,coindata,changeData,ispro,bannerID,upgraded}) => 
                 </TouchableOpacity>
             </View>
             <View style={{paddingHorizontal:10,height:30,alignItems:"center",marginBottom:5}}>
-                <View style={styles.listTab}>
+                <View style={[styles.listTab,(bool_isDarkMode()?{backgroundColor:"white"}:{backgroundColor:"#E3E3E3"})]}>
                     {listTab.map((e) => (
                         <View key={e.status}>
                             <TouchableOpacity style={[styles.btnTab, status===e.status&&styles.btnTabActive]} onPress={()=>setStatusFilter(e.status)}>
@@ -385,14 +359,14 @@ const Prices = ({userEmail,fav,coindata,changeData,ispro,bannerID,upgraded}) => 
                 </ScrollView>
             </View>
             <View style={{alignSelf:"center"}}>
-            {/*!ispro && 
+            {!ispro && 
                 <AdMobBanner
                 bannerSize="fullBanner"
                 adUnitID={bannerID} // Test ID, Replace with your-admob-unit-id
                 servePersonalizedAds // true or false
                 //onDidFailToReceiveAdWithError={this.bannerError}
                 />
-            */}
+            }
             </View>
         </View>
         </SafeAreaView>
@@ -405,7 +379,6 @@ const styles = StyleSheet.create({
     listTab:{
         flex:1,
         justifyContent:"space-between",
-        backgroundColor:"white",
         flexDirection:"row",
         borderRadius:10,
         width:"100%",
@@ -431,12 +404,12 @@ const styles = StyleSheet.create({
         fontSize:15,
     },
     interval_btnTab:{
-        borderRadius:5,paddingHorizontal:4,width:50
+        borderRadius:3,paddingHorizontal:4,width:50
     },
     interval_text:{
         fontWeight:"bold",fontSize:15,textAlign:"center"
     },
-    interval_textActive :{
+    interval_textActive :{//for darkmode
         color:"#468559"
     }
 })

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, KeyboardAvoidingView, TextInput } from 'react-native';
+import { StyleSheet, Text, View, KeyboardAvoidingView, TextInput, Platform } from 'react-native';
 import { Button, Image } from 'react-native-elements';
 import { StatusBar } from 'expo-status-bar';
 import { db, auth } from '../../../firebase';
@@ -113,7 +113,7 @@ const RegisterScreen = ({navigation}) => {
                 <View>
                     <Image
                     source={require('../../assets/icon.png')}
-                    style={{width:40,height:40,marginBottom:5,marginTop:100,}}
+                    style={[{width:40,height:40,marginBottom:5,marginTop:100,},(Platform.OS === 'ios') && {borderRadius:5}]}
                     />
                 </View>
                 <Text style={{color:brandTextColor(),marginBottom:40,fontSize:20,fontWeight:"bold"}}>CoinTracer</Text>

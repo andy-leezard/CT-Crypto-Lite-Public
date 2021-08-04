@@ -6,9 +6,9 @@ import { db } from '../../firebase';
 const android_rewarded_test = "ca-app-pub-3940256099942544/5224354917";
 const ios_rewarded_test = "ca-app-pub-3940256099942544/1712485313";
 
-const android_rewarded = "android_rewarded";
-const ios_rewarded = "ios_rewarded";
-const is_test = true;
+const android_rewarded = "ca-app-pub-2294308974784218/5498066933";
+const ios_rewarded = "ca-app-pub-2294308974784218/1175678544";
+const bool_AD_is_test = true;
 
 export default class AdMobRewardedComponent extends Component {
     state = {
@@ -17,24 +17,15 @@ export default class AdMobRewardedComponent extends Component {
 
     async componentDidMount() {
         await setTestDeviceIDAsync('EMULATOR');
-        if(is_test){
-            console.log("called test rewarded id for", Platform.OS);
-            if(Platform.OS === 'ios'){
-                AdMobRewarded.setAdUnitID(ios_rewarded_test);
-            }else{
-                AdMobRewarded.setAdUnitID(android_rewarded_test);
-            }
+        if(bool_AD_is_test){
+            AdMobRewarded.setAdUnitID((Platform.OS === 'ios') ? ios_rewarded_test:android_rewarded_test);
         }else{
-            console.log("WARNING - called an actual rewarded id for", Platform.OS);
-            if(Platform.OS === 'ios'){
-                AdMobRewarded.setAdUnitID(ios_rewarded);
-            }else{
-                AdMobRewarded.setAdUnitID(android_rewarded);
-            }
+            AdMobRewarded.setAdUnitID((Platform.OS === 'ios') ? ios_rewarded:android_rewarded);
         }
         //AdMobRewarded.setAdUnitID(android_rewarded_test); // Test ID, Replace with your-admob-unit-id
         AdMobRewarded.addEventListener('rewardedVideoUserDidEarnReward', () => {
             console.log('User Did Earn Reward');
+            this.setState({ loadedAd: false });
             const dir = db.collection('users').doc(this.props.user);
             dir.get().then((doc)=>{
                 let theseed = doc.data().seed;
@@ -68,7 +59,7 @@ export default class AdMobRewardedComponent extends Component {
                 Alert.alert(
                     "VUSD Reward",
                     "You earned 100 VUSD !",
-                    [{ text: "OK", onPress: () => console.log("OK Pressed") }]
+                    [{ text: "OK"}]
                 );
             });
         });
@@ -76,14 +67,21 @@ export default class AdMobRewardedComponent extends Component {
         AdMobRewarded.addEventListener('rewardedVideoDidFailToLoad', () => console.log('FailedToLoad'));
         AdMobRewarded.addEventListener('rewardedVideoDidPresent', () => console.log('Did Present'));
         AdMobRewarded.addEventListener('rewardedVideoDidFailToPresent', () => console.log('Failed To Present'));
-        AdMobRewarded.addEventListener('rewardedVideoDidDismiss', () => {AdMobRewarded.removeAllListeners();console.log('Video Did Dismiss');});
+        AdMobRewarded.addEventListener('rewardedVideoDidDismiss', () => {
+            console.log('Video Did Dismiss');
+            AdMobRewarded.requestAdAsync()
+                .then(()=>{
+                    this.setState({ loadedAd: true });
+                })
+                .catch(error => {
+                    (error.message === "Ad is already loaded.") && this.setState({ loadedAd: true });
+                    console.warn(error.message);
+            });
+        });
 
         await AdMobRewarded.requestAdAsync().catch(error => {
-            if(error.message === "Ad is already loaded."){
-                console.log(error.message);this.setState({ loadedAd: true });
-            }else{
-                console.warn(error.message);
-            }
+            (error.message === "Ad is already loaded.") && this.setState({ loadedAd: true });
+            console.warn(error.message);
         });
     }
 
@@ -93,35 +91,29 @@ export default class AdMobRewardedComponent extends Component {
     }
 
     _handlePress = async () => {
-        await AdMobRewarded.showAdAsync().catch(error => {
-            if(error.message==="Ad is not ready."){
-                return;
-            }
-        });
+        await AdMobRewarded.showAdAsync().catch(error => {console.warn(error.message);});
     }
 
     render() {
-    const { loadedAd } = this.state;
-    const dynamicColor = () => {
-        return loadedAd ? "#2394DB":"#E3E6E8";
-    }
-    const dynamicTextColor = () => {
-        return loadedAd ? "#ffffff":"#1e1e1e";
-    }
-    if(this.props.renderThis){
-        return (
-            <TouchableOpacity onPress={this._handlePress} disabled={!loadedAd} 
-            style={{width:this.props.width,marginBottom:5,height:35,borderRadius:5,backgroundColor:dynamicColor(),justifyContent:"center",alignItems:"center"}}>
-                <Text style={{fontSize:16, fontWeight:"700", color:dynamicTextColor()}}>Get free 100 VUSD</Text>
-            </TouchableOpacity>
-            )
-    }else{
-        return (
-            <TouchableOpacity
-            style={{width:this.props.width,marginBottom:5,height:35,borderRadius:5,backgroundColor:"#E3E6E8",justifyContent:"center",alignItems:"center"}}>
-                <Text style={{fontSize:16, fontWeight:"700", color:"#1e1e1e"}}>Disabled</Text>
-            </TouchableOpacity>
-            )
-    }
+        const { loadedAd } = this.state;
+        const dynamicColor = () => {
+            return loadedAd ? "#2394DB":"#E3E6E8";
+        }
+        const dynamicTextColor = () => {
+            return loadedAd ? "#ffffff":"#1e1e1e";
+        }
+        if(loadedAd){
+            return (
+                <TouchableOpacity onPress={this._handlePress} disabled={!loadedAd} 
+                style={{width:this.props.width,marginBottom:5,height:35,borderRadius:5,backgroundColor:dynamicColor(),justifyContent:"center",alignItems:"center"}}>
+                    <Text style={{fontSize:16, fontWeight:"700", color:dynamicTextColor()}}>Get free 100 VUSD</Text>
+                </TouchableOpacity>
+                )
+        }else{
+            return (
+                <>
+                </>
+                )
+        }
     }
 }

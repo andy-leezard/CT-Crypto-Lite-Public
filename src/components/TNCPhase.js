@@ -31,6 +31,7 @@ const TNCPhase = ({route, navigation}) => {
             <View style={{height:Dimensions.get("window").height/1.4, marginBottom:10}}>
                 <ScrollView>
                     <TNC candeleteacc={"This option is available below."}/>
+                    <View style={{height:100}}/>
                 </ScrollView>
             </View>
         </SafeAreaView>

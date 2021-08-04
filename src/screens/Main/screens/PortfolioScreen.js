@@ -13,13 +13,13 @@ const Stack = createStackNavigator();
 const screenOptions ={ headerShown: false }
 const sliceColor = ['#3684CB','#3FB2AB','#6CD293', '#C7F5D6', '#CBD5E0', '#FFFFFF'];
 
-const PortfolioScreen = ({userEmail, username, coindata, nameOnly, postData, totalbuyin, totalbuyin_const, pnldate, bannerID, seed, ispro, upgraded}) => {
+const PortfolioScreen = ({userEmail, username, coindata, postData, totalbuyin, totalbuyin_const, pnldate, bannerID, seed, ispro, upgraded}) => {
     const scheme = useColorScheme();
     const [portfolio, setPortfolio] = useState([]);
 
     useEffect(() => {
         const pieSeries = [];const completeData = [];const chartkeys = [];let desc = [];
-        let thesum = 0; //let times = nameOnly.length;
+        let thesum = 0;
         postData.forEach((i) => {
             let onceonly = coindata.filter(j => i.id === j.name);
             let subsum = i.quantity * onceonly[0].current_price;
@@ -64,7 +64,7 @@ const PortfolioScreen = ({userEmail, username, coindata, nameOnly, postData, tot
         //console.log(obj.piedata);
         console.log("updated portfolio");
         setPortfolio(obj);
-    }, [nameOnly, postData, totalbuyin, totalbuyin_const, pnldate, seed])
+    }, [postData, pnldate, seed])
 
     const bool_isDarkMode = () => {
         return scheme === "dark";
