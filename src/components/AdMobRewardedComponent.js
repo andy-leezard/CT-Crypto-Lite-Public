@@ -6,8 +6,8 @@ import { db } from '../../firebase';
 const android_rewarded_test = "ca-app-pub-3940256099942544/5224354917";
 const ios_rewarded_test = "ca-app-pub-3940256099942544/1712485313";
 
-const android_rewarded = "ca-app-pub-2294308974784218/5498066933";
-const ios_rewarded = "ca-app-pub-2294308974784218/1175678544";
+const android_rewarded = "ca-app-pub-xxxxxxxxxxxxxxxx/xxxxxxxxxx";
+const ios_rewarded = "ca-app-pub-xxxxxxxxxxxxxxxx/xxxxxxxxxx";
 const bool_AD_is_test = true;
 
 export default class AdMobRewardedComponent extends Component {
@@ -48,7 +48,7 @@ export default class AdMobRewardedComponent extends Component {
                         quantity: 100,
                         fiat: 0,
                         price: 1,
-                        imgsrc: "https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/usd_custom.png?alt=media&token=857456bf-e06b-4fc6-95a2-72f1d69212dc",
+                        imgsrc: "https://imgsrc",
                         orderNum: Number(new Date().getTime()).toString().substring(0, 10),
                         time: l.join(' ')
                      })

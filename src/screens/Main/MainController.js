@@ -19,8 +19,8 @@ const Tab = createBottomTabNavigator();
 const android_banner = "ca-app-pub-2294308974784218/5447463023";
 const ios_banner = "ca-app-pub-2294308974784218/9054168564";
 
-const android_banner_test = "ca-app-pub-3940256099942544/6300978111";
-const ios_banner_test = "ca-app-pub-3940256099942544/2934735716";
+const android_banner_test = "ca-app-pub-xxxxxxxxxxxxxxxx/xxxxxxxxxx";
+const ios_banner_test = "ca-app-pub-xxxxxxxxxxxxxxxx/xxxxxxxxxx";
 const bool_AD_is_test = true;
 
 const MainController = ({coindata, userEmail, changedata}) => {

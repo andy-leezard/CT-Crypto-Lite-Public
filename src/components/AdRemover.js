@@ -85,7 +85,7 @@ const AdRemover = ({route, navigation}) => {
                     quantity: 3000,
                     fiat: -1,
                     price: 1,
-                    imgsrc: "https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/usd_custom.png?alt=media&token=857456bf-e06b-4fc6-95a2-72f1d69212dc",
+                    imgsrc: "https://imgsrc",
                     orderNum: Number(new Date().getTime()).toString().substring(0, 10),
                     time: simplifyDate(new Date())
                 })

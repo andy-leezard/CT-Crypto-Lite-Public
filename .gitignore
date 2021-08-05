@@ -17,7 +17,7 @@ web-build/
 firebase.*
 
 #App.js
-App.*
+app.json
 
 #backups
 *.rar
