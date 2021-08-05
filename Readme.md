@@ -42,6 +42,7 @@ This app stores data that is directly provided by the user in the backend server
 
 Soon to be available on AppStore and Google Play.
 
+# Images from Android virtual machine
 ![Screenshot1](https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/Screenshot_1.png?alt=media&token=0f4a1849-ff7b-4c75-9665-36c0ab0b4811)
 ![Screenshot2](https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/Screenshot_2.png?alt=media&token=02ed1b55-65a7-4083-8301-de931fe9aca3)
 ![Screenshot3](https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/Screenshot_3.png?alt=media&token=6745c704-8d38-422a-b582-66ea878a838f)
