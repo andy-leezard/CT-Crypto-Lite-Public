@@ -3,10 +3,14 @@
 Version: 1.0.0 iOS and Android (last updated: August 04 2021)
 Now supports dark mode on any device.
 
+<p align="center">
 <img src="https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/icon_rounded.png?alt=media&token=1b73b603-bd27-4c83-b753-cc601e812806" alt="Logo" width="96" height="96">
+</p>
+<p float="left">
 <img src="https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/1_1242_2688.jpg?alt=media&token=74e8baa4-34ec-4a20-ba7c-d5d6131601af" alt="Screenshot_1" width="207" height="448">
 <img src="https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/2_1242_2688.jpg?alt=media&token=da59a86a-358d-4754-bc49-be7c102fbb1a" alt="Screenshot_2" width="207" height="448">
 <img src="https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/3_1242_2688.jpg?alt=media&token=d4b1f904-18c5-48ec-b523-ac24fe69617c" alt="Screenshot_3" width="207" height="448">
+</p>
 
 CoinTracer is a cross-platform mobile app for crypto investment simulation built on React Native by Andy Lee in 2021.
 
