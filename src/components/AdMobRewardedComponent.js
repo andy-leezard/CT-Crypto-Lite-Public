@@ -28,17 +28,14 @@ export default class AdMobRewardedComponent extends Component {
             this.setState({ loadedAd: false });
             const dir = db.collection('users').doc(this.props.user);
             dir.get().then((doc)=>{
-                let theseed = doc.data().seed;
-                let thetotalbuyin = doc.data().totalbuyin;
-                let thetotalbuyin_const = doc.data().totalbuyin_constant;
-                let newSeed = theseed + 100;
-                let newThetotalbuyin = thetotalbuyin + 100;
-                let newThetotalbuyin_const = thetotalbuyin_const + 100;
+                let newSeed = doc.data().seed+ 100;
+                let new_totalbuyin = doc.data().totalbuyin+ 100;
+                let new_totalbuyin_const = doc.data().totalbuyin_constant+ 100;
                 let j = new Date().toString();
                 let k = j.split(" ");
                 let l = k.slice(1, 5);
                 l[3] = l[3].substring(0,5);
-                dir.update({seed:newSeed, totalbuyin:newThetotalbuyin, totalbuyin_constant:newThetotalbuyin_const}).then(()=>{
+                dir.update({seed:newSeed, totalbuyin:new_totalbuyin, totalbuyin_constant:new_totalbuyin_const}).then(()=>{
                     dir
                     .collection("history")
                     .add({
@@ -53,9 +50,6 @@ export default class AdMobRewardedComponent extends Component {
                         time: l.join(' ')
                      })
                 });
-                console.log("updated seed from ",theseed, "to", newSeed);
-                console.log("updated total buy-in from ",thetotalbuyin, "to", newThetotalbuyin);
-                console.log("updated constant total buy-in from ",thetotalbuyin_const, "to", newThetotalbuyin_const);
                 Alert.alert(
                     "VUSD Reward",
                     "You earned 100 VUSD !",
