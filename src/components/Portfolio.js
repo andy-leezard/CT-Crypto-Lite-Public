@@ -12,7 +12,7 @@ const width = Dimensions.get("window").width-20;
 const screenHeight = Dimensions.get("window").height;
 const uri_fiatcoin = "https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/usd_custom.png?alt=media&token=857456bf-e06b-4fc6-95a2-72f1d69212dc";
 
-const initialLimit = 6;
+const initialLimit = 15;
 
 const Portfolio = ({username, userEmail, portfolio, ispro, bannerID, upgraded}) => {
     const navigation = useNavigation();

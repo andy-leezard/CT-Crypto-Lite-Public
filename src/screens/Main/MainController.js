@@ -76,8 +76,8 @@ const MainController = ({coindata, userEmail, changedata}) => {
         return unsubscribe;
     }, [coindata, userEmail, changedata])
 
-    const bannerAdId = (test) => {
-      if(test){
+    const bannerAdId = () => {
+      if(bool_AD_is_test){
         //console.log("called test banner id for", Platform.OS);
         return (Platform.OS === 'ios') ? ios_banner_test:android_banner_test;
       }else{
@@ -167,7 +167,7 @@ const MainController = ({coindata, userEmail, changedata}) => {
         <Tab.Screen
           name="Prices"
           //component={PricesScreen}
-          children={()=><PricesScreen userEmail={userEmail} fav={fav} coindata={coindata} changeData={changedata} ispro={proversion} bannerID={bannerAdId(bool_AD_is_test)} upgraded={boughtPro}/>}
+          children={()=><PricesScreen userEmail={userEmail} fav={fav} coindata={coindata} changeData={changedata} ispro={proversion} bannerID={bannerAdId()} upgraded={boughtPro}/>}
           options={{
             tabBarIcon:({ focused }) => (
               <View style={{alignItems: "center", justifyContent: "center",width:40}}>
@@ -191,7 +191,7 @@ const MainController = ({coindata, userEmail, changedata}) => {
         />
         <Tab.Screen
           name="Portfolio" //component={TradingScreen}
-          children={()=><PortfolioScreen userEmail={userEmail} username={username} seed={seed} coindata={coindata} postData={postData} totalbuyin={totalbuyin} totalbuyin_const={totalbuyin_const} pnldate={pnldate} ispro={proversion} bannerID={bannerAdId(bool_AD_is_test)} upgraded={boughtPro}/>}
+          children={()=><PortfolioScreen userEmail={userEmail} username={username} seed={seed} coindata={coindata} postData={postData} totalbuyin={totalbuyin} totalbuyin_const={totalbuyin_const} pnldate={pnldate} ispro={proversion} bannerID={bannerAdId()} upgraded={boughtPro}/>}
           options={{
             tabBarIcon: ({ focused }) => (
               <View style={{ alignItems: "center", justifyContent: "center"}}>
@@ -210,7 +210,7 @@ const MainController = ({coindata, userEmail, changedata}) => {
         />
         <Tab.Screen
           name="Settings" //component={PortfolioScreen}
-          children={()=><SettingsScreen userEmail={userEmail} username={username} requirePIN={requirePIN} ispro={proversion} bannerID={bannerAdId(bool_AD_is_test)} boughtPro={boughtPro}/>}
+          children={()=><SettingsScreen userEmail={userEmail} username={username} requirePIN={requirePIN} ispro={proversion} bannerID={bannerAdId()} boughtPro={boughtPro}/>}
           options={{
             tabBarIcon:({ focused }) => (
               <View style={{alignItems: "center", justifyContent: "center",width:40}}>
