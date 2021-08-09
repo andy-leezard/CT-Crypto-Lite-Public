@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
-import { StyleSheet, Text, View, ScrollView, Image, TouchableOpacity, Dimensions, TextInput } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, Image, TouchableOpacity, Dimensions, TextInput, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LineChart } from "react-native-chart-kit";
 import { useColorScheme } from "react-native-appearance";
-import Loading from '../../../components/Loading';
+import { AdMobBanner} from 'expo-ads-admob';
 import _ from 'lodash';
 import Trader from '../../../components/Trader';
 import { KeyboardAvoidingView } from 'react-native';
@@ -14,9 +14,10 @@ const trading_dataIntervalListTab = [
 ];
 
 const width = Dimensions.get("window").width-20;
+const screenHeight = Dimensions.get("window").height;
 
 const TradingScreen = ({route,navigation}) => {
-    const { email, imgurl, sparkline, tradingCoin, coinprice, coinsymbol, upgraded } = route.params;
+    const { email, imgurl, sparkline, tradingCoin, coinprice, coinsymbol, upgraded, bannerID, ispro } = route.params;
     const [tradingdatainterval, settradingdatainterval] = useState("1D");
     const scheme = useColorScheme();
     
@@ -28,6 +29,9 @@ const TradingScreen = ({route,navigation}) => {
     }
     const borderColor = () => {
         return bool_isDarkMode() ? "#CCCCCC":"#4a4a4a";
+    }
+    const containerRadiusColor = () => {
+        return bool_isDarkMode() ? "#a196b5":"#8c829e";
     }
     const textColor = () => {
         return bool_isDarkMode() ? "#FFFFFF":"#000000";
@@ -55,6 +59,13 @@ const TradingScreen = ({route,navigation}) => {
     }
     const setTradingIntervalFilter = (i) => {
         settradingdatainterval(i);console.log("trading interval set to :",i);
+    }
+    const dynamicMargin = () => {
+        if(ispro){
+            return (Platform.OS === 'ios') ? 173:117;
+        }else{
+            return (Platform.OS === 'ios') ? 233:177;
+        }
     }
 
     const RenderScreen = () => {
@@ -124,7 +135,7 @@ const TradingScreen = ({route,navigation}) => {
                         withHorizontalLines={false}//horizontalLabelRotation={-5}
                         withVerticalLines={false}yLabelsOffset={5}
                         bezier
-                        style={{marginTop: 8,borderRadius: 10,borderWidth:2,borderColor:borderColor(),backgroundColor:containerColor()}}
+                        style={{marginTop: 8,borderRadius: 10,borderWidth:2,borderColor:containerRadiusColor(),backgroundColor:containerColor()}}
                     />
                 </View>
             </View>
@@ -134,22 +145,33 @@ const TradingScreen = ({route,navigation}) => {
     return (
         <SafeAreaView>
             <KeyboardAvoidingView style={{alignItems: 'center',justifyContent: "flex-start",}} behavior={Platform.OS === "ios" ? "padding" : "height"}>
-                <TouchableOpacity onPress={()=>navigation.goBack()} style={{flexDirection:"row",alignItems:"center",alignSelf:"flex-start"}}>
-                        <Image source={require("../../../assets/icons/1x/arrow_darkmode_flipped.png")} style={{width:20,height:20}}/>
+                <TouchableOpacity onPress={()=>navigation.goBack()} style={{flexDirection:"row",alignItems:"center",alignSelf:"flex-start",marginLeft:10}}>
+                        <Image source={require("../../../assets/icons/1x/arrow_darkmode_flipped.png")} style={[{width:20,height:20},(!bool_isDarkMode())&&{tintColor:"#000000"}]}/>
                         <Image source={{uri:imgurl}} style={{width:20,height:20}}/>
                         <Text style={{fontSize:20,fontWeight:"bold",color:textColor(),marginLeft:5}}>{tradingCoin}</Text>
                 </TouchableOpacity>
-                <ScrollView>
-                    <View>
-                        <View style={{flexDirection:"row",justifyContent:"space-between",alignItems:"center"}}>
-                            <Text style={{fontSize:20,fontWeight:"bold",color:textColor(),marginLeft:5}}>${coinprice}</Text>
-                            <Text style={{fontSize:14,fontWeight:"bold",color:borderColor(),marginRight:5}}>current average market price </Text>
+                <View style={{height:screenHeight-dynamicMargin(),marginBottom:1}}>
+                    <ScrollView>
+                        <View>
+                            <View style={{flexDirection:"row",justifyContent:"space-between",alignItems:"center"}}>
+                                <Text style={{fontSize:20,fontWeight:"bold",color:textColor(),marginLeft:5}}>${coinprice}</Text>
+                                <Text style={{fontSize:14,fontWeight:"bold",color:borderColor(),marginRight:5}}>current average market price </Text>
+                            </View>
+                            <RenderScreen/>
+                            <Trader coinname={tradingCoin} user={email} coinprice={coinprice} coinsymbol={coinsymbol} coinIcon={imgurl} upgraded={upgraded}/>
                         </View>
-                        <RenderScreen/>
-                        <Trader coinname={tradingCoin} user={email} coinprice={coinprice} coinsymbol={coinsymbol} coinIcon={imgurl} upgraded={upgraded}/>
-                        <View style={{height:125}}/>
-                    </View>
-                </ScrollView>
+                    </ScrollView>
+                </View>
+                <View style={{alignSelf:"center"}}>
+                    {!ispro && 
+                        <AdMobBanner
+                        bannerSize="fullBanner"
+                        adUnitID={bannerID} // Test ID, Replace with your-admob-unit-id
+                        servePersonalizedAds // true or false
+                        //onDidFailToReceiveAdWithError={this.bannerError}
+                        />
+                    }
+                </View>
             </KeyboardAvoidingView>
         </SafeAreaView>
     )

@@ -15,12 +15,12 @@ const PricesScreen = ({ userEmail, username, requirePIN, ispro, bannerID, bought
     const scheme = useColorScheme();
 
     const globalScreenOptions_dark ={
-        headerStyle: {backgroundColor: "#335cb0"},
+        headerStyle: {backgroundColor: "#8374e3"},
         headerTitleStyle: {color:"#FFFFFF"},
         headerTintColor: "#FFFFFF"
     }
     const globalScreenOptions_light ={
-        headerStyle: {backgroundColor: "#73a1ff"},
+        headerStyle: {backgroundColor: "#8681FF"},
         headerTitleStyle: {color:"#000000"},
         headerTintColor: "#000000"
     }

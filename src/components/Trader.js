@@ -1,11 +1,13 @@
 import React, {useEffect,useState} from 'react'
-import { View, Text, Image, StyleSheet, TouchableOpacity, Dimensions, TextInput, Alert } from 'react-native'
+import { View, Text, Image, StyleSheet, TouchableOpacity, Dimensions, TextInput, Alert, Platform } from 'react-native'
 import { db } from '../../firebase';
 import { Button } from 'react-native-elements';
 import Slider from "@brlja/react-native-slider";
 import AdMobRewardedComponent from './AdMobRewardedComponent';
 import { useColorScheme } from "react-native-appearance";
 import Env from '../env.json';
+import * as StoreReview from 'expo-store-review';
+import stablecoins from '../stablecoins.json';
 
 const width = Dimensions.get("window").width-20;
 const actionListTab = [
@@ -27,6 +29,17 @@ const Trader = ({coinname,user,coinprice,coinsymbol,coinIcon,upgraded}) => {
     const [commission_percentage, setCommission_Percentage] = useState(1);
 
     const ref = db.collection('users').doc(user);
+
+    const stableCoinAlert = () =>{
+        const message = coinname + ` is a stable coin.\nIts price won't change.`;
+        Alert.alert(
+            "Information",
+            message,
+            [
+              {text: "OK"}
+            ]
+        );
+    }
     
     useEffect(() => {
         bool_isDarkMode() ? setActionColor("#42B95D"):setActionColor("#36eb5f");
@@ -46,6 +59,7 @@ const Trader = ({coinname,user,coinprice,coinsymbol,coinIcon,upgraded}) => {
                         if(unitmode==="Fiat"){setLimit(_seed);}else{setLimit(doc.data().quantity);}
                         console.log("Document data:", doc.data().quantity);
                     }else{
+                        stablecoins.some(item => item.name === coinname) && stableCoinAlert();
                         ref.collection("wallet").doc(coinname).set({quantity: 0})
                             .then(()=>{console.log("successfully created a new wallet ref :", coinname)})
                         // doc.data() will be undefined in this case
@@ -57,6 +71,21 @@ const Trader = ({coinname,user,coinprice,coinsymbol,coinIcon,upgraded}) => {
 
     String.prototype.replaceAt = function(index, replacement) {
         return this.substr(0, index) + replacement + this.substr(index + replacement.length);
+    }
+
+    const requestReview = async() => {
+        let _1 = await StoreReview.isAvailableAsync();
+        let _2 = await StoreReview.hasAction();
+        let _3 = await StoreReview.storeUrl() ?? "";
+        console.log("can this device review ??",_1);
+        console.log("has action ?? ",_2);
+        console.log("What is the store url ?? ",_3);
+        if(_1 && _2 && _3 !==""){
+            console.log("requesting review");
+            await StoreReview.requestReview();
+        }else{
+            console.log("cannot demand review");
+        }
     }
 
     const buyPrice = () => {
@@ -72,9 +101,6 @@ const Trader = ({coinname,user,coinprice,coinsymbol,coinIcon,upgraded}) => {
     }
     const containerColor = () => {
         return bool_isDarkMode() ? "#1c1c1c":"#e8e8e8";
-    }
-    const borderColor = () => {
-        return bool_isDarkMode() ? "#CCCCCC":"#4a4a4a";
     }
     const buyColor = () => {
         return bool_isDarkMode() ? Env.buyColor_dark:Env.buyColor_light;
@@ -96,6 +122,9 @@ const Trader = ({coinname,user,coinprice,coinsymbol,coinIcon,upgraded}) => {
     }
     const containerColor_secondary = () => {
         return bool_isDarkMode() ? "#333333":"#5c5c5c";
+    }
+    const containerRadiusColor = () => {
+        return bool_isDarkMode() ? "#a196b5":"#8c829e";
     }
 
     const regardingCommissionFees = () => {
@@ -478,6 +507,7 @@ const Trader = ({coinname,user,coinprice,coinsymbol,coinIcon,upgraded}) => {
                             })
                             .then(()=>{
                                 console.log("successfully updated coin quantity of : ", coinname, " (",newquantity,")");
+                                requestReview();
                             })
                             .catch((err)=>{
                                 console.log("An error occurred while recording history:", err);
@@ -530,6 +560,7 @@ const Trader = ({coinname,user,coinprice,coinsymbol,coinIcon,upgraded}) => {
                                     })
                                     .then(()=>{
                                         console.log("successfully updated coin quantity of : ", coinname, " (",newquantity,")");
+                                        requestReview();
                                     })
                                     .catch((err)=>{
                                         console.log("An error occurred while recording history:", err);
@@ -542,6 +573,9 @@ const Trader = ({coinname,user,coinprice,coinsymbol,coinIcon,upgraded}) => {
                                     slideHandler(0);
                                     return;
                                 })
+                        }else{
+                            console.log("Fraud detected ! - serverside total quantity is ", quantity_serverSide, "but input seed was",actionQuantity_crypto);
+                            slideHandler(0);
                         }
                     }else{
                         console.log("error - the user does not have any", coinname," to sell.");
@@ -564,7 +598,7 @@ const Trader = ({coinname,user,coinprice,coinsymbol,coinIcon,upgraded}) => {
 
     return (
         <View style={{alignItems:"center",marginTop:10}}>
-            <View style={{flexDirection:"row",justifyContent:"space-between",borderWidth:1,borderRadius:10,borderColor:borderColor(),backgroundColor:containerColor(), width:width, height:50,padding:5,marginBottom:10}}>
+            <View style={{flexDirection:"row",justifyContent:"space-between",borderWidth:2,borderRadius:10,borderColor:containerRadiusColor(),backgroundColor:containerColor(), width:width, height:50,padding:5,marginBottom:10}}>
                 <View style={{flexDirection:"row", width:((width/2)-15), alignItems:"center"}}>
                     <Image source={{uri:coinIcon}} style={{width:40,height:40}}/>
                     <Text style={{fontSize:15,fontWeight:"bold",color:textColor(),marginLeft:5}}>My {coinsymbol} wallet</Text>
@@ -574,7 +608,7 @@ const Trader = ({coinname,user,coinprice,coinsymbol,coinIcon,upgraded}) => {
                     <Text style={{fontSize:15,fontWeight:"bold",color:subTextColor(),marginRight:5,textAlign:"right"}}>{quantity} {coinsymbol}</Text>
                 </View>
             </View>
-            <View style={{flexDirection:"row",justifyContent:"space-between",borderWidth:1,borderRadius:10,borderColor:borderColor(),backgroundColor:containerColor(), width:width, height:50,padding:5,marginBottom:6}}>
+            <View style={{flexDirection:"row",justifyContent:"space-between",borderWidth:2,borderRadius:10,borderColor:containerRadiusColor(),backgroundColor:containerColor(), width:width, height:50,padding:5,marginBottom:6}}>
                 <View style={{flexDirection:"row", width:((width/2)-15), alignItems:"center"}}>
                     <Image source={require('../assets/icons/1x/usd_custom.png')} style={{width:35,height:35}}/>
                     <Text style={{fontSize:15,fontWeight:"bold",color:textColor(),marginHorizontal:10}}>My virtual USD wallet</Text>
@@ -667,10 +701,10 @@ const Trader = ({coinname,user,coinprice,coinsymbol,coinIcon,upgraded}) => {
 
 const styles = StyleSheet.create({
     action_tab:{
-        borderRadius:5,paddingHorizontal:8,width:(Dimensions.get("window").width-40)/2,height:35,justifyContent:"center"
+        borderRadius:5,paddingHorizontal:8,width:(Dimensions.get("window").width-20)/2,height:35,justifyContent:"center"
     },
     unit_tab:{
-        borderRadius:5,paddingHorizontal:8,width:(Dimensions.get("window").width-40)/2,height:35,justifyContent:"center"
+        borderRadius:5,paddingHorizontal:8,width:(Dimensions.get("window").width-20)/2,height:35,justifyContent:"center"
     },
     unit_text:{
         color:"white",fontWeight:"bold",fontSize:15,textAlign:"center"

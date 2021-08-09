@@ -85,7 +85,7 @@ const AdRemover = ({route, navigation}) => {
                     quantity: 3000,
                     fiat: -1,
                     price: 1,
-                    imgsrc: "https://imgsrc",
+                    imgsrc: "imgsrc",
                     orderNum: Number(new Date().getTime()).toString().substring(0, 10),
                     time: simplifyDate(new Date())
                 })

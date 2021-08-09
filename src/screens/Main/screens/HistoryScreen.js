@@ -2,6 +2,7 @@ import React, { useEffect, useState} from 'react';
 import { Text, View, Dimensions, TouchableOpacity, Image, ScrollView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useColorScheme } from "react-native-appearance";
+import { AdMobBanner} from 'expo-ads-admob';
 import Env from '../../../env.json';
 import { db } from '../../../../firebase';
 import Loading from '../../../components/Loading';
@@ -9,7 +10,7 @@ import Loading from '../../../components/Loading';
 const HistoryScreen = ({route, navigation}) => {
     const scheme = useColorScheme();
     const [history, setHistory] = useState([]);
-    const { email } = route.params;
+    const { email, ispro, bannerID } = route.params;
     const [limit, setlimit] = useState(20);
 
     const width = Dimensions.get("window").width-20;
@@ -51,7 +52,7 @@ const HistoryScreen = ({route, navigation}) => {
         return bool_isDarkMode() ? "#1c1c1c":"#e8e8e8";
     }
     const borderColor = () => {
-        return bool_isDarkMode() ? "#CCCCCC":"#4a4a4a";
+        return bool_isDarkMode() ? "#a196b5":"#8c829e";
     }
     const buyColor = () => {
         return bool_isDarkMode() ? Env.buyColor_dark:Env.buyColor_light;
@@ -79,7 +80,11 @@ const HistoryScreen = ({route, navigation}) => {
         }
     }
     const dynamicMargin = () => {
-        return (Platform.OS === "ios") ? 200:145;
+        if(ispro){
+            return (Platform.OS === "ios") ? 194:138;
+        }else{
+            return (Platform.OS === "ios") ? 254:198;
+        }
     }
     const dynamicRound = (i,j) => {
         return (Math.round(i * Math.pow(10,j)) / Math.pow(10,j));
@@ -118,7 +123,7 @@ const HistoryScreen = ({route, navigation}) => {
                     {history.map((i,index)=>(
                             <View key={index} style={[{flexDirection:"row",height:50,padding:5,margin:2,alignItems:"center",borderRadius:5},(i.type==="Sold" || i.type === "Spent")?{backgroundColor:sellColor()}:{backgroundColor:buyColor()}]}>
                                 <View style={{position:"absolute",width:34,height:34,borderRadius:8,backgroundColor:"white",marginLeft:8}} />
-                                <Image source={{uri:i.imgsrc}} style={{width:30,height:30,marginLeft:5}}/>
+                                <Image source={{uri:i.imgsrc}} style={{width:29,height:29,marginLeft:5}}/>
                                 <View style={{marginLeft:10, width:"90%",marginRight:5}}>
                                     <Text style={{color:textColor(),fontWeight:"700"}}>{i.type} {i.quantity} {i.target} for {(i.fiat>0) ? "$":""}{(i.fiat>0) ? (numberWithCommas(dynamicRound(i.fiat,2))):(renderFreeIfZero(i.fiat))}</Text>
                                     <View style={{flexDirection:"row",justifyContent:"space-between",marginRight:13}}>
@@ -136,11 +141,11 @@ const HistoryScreen = ({route, navigation}) => {
         <SafeAreaView style={{flex:1,backgroundColor:bgColor()}}>
             <TouchableOpacity onPress={()=>navigation.goBack()} style={{marginBottom:15,marginTop:5,marginLeft:5}}>
                 <View style={{flexDirection:"row",alignItems:"center"}}>
-                    <Image source={require("../../../assets/icons/1x/arrow_darkmode_flipped.png")} style={{width:20,height:20}}/>
+                    <Image source={require("../../../assets/icons/1x/arrow_darkmode_flipped.png")} style={[{width:20,height:20,marginLeft:5},(!bool_isDarkMode())&&{tintColor:"#000000"}]}/>
                     <Text style={{fontSize:20,fontWeight:"bold",color:textColor(),marginLeft:5}}>History</Text>
                 </View>
             </TouchableOpacity>
-            <View style={{alignSelf:"center",borderWidth:1,borderRadius:10,borderColor:borderColor(),backgroundColor:containerColor(),width:width, height:screenHeight-dynamicMargin()}}>
+            <View style={{alignSelf:"center",borderWidth:2,borderRadius:10,borderColor:borderColor(),backgroundColor:containerColor(),width:width, height:screenHeight-dynamicMargin(),marginBottom:2}}>
                 <ScrollView
                     scrollEventThrottle={4000}
                     onScroll={({nativeEvent})=>{
@@ -155,6 +160,16 @@ const HistoryScreen = ({route, navigation}) => {
                     {(history.length===0)?(<InternalLoadingScreen/>):(<RenderScreen/>)}
                     <View style={{height:10}}/>
                 </ScrollView>
+            </View>
+            <View style={{alignSelf:"center"}}>
+            {!ispro && 
+                <AdMobBanner
+                bannerSize="fullBanner"
+                adUnitID={bannerID} // Test ID, Replace with your-admob-unit-id
+                servePersonalizedAds // true or false
+                //onDidFailToReceiveAdWithError={this.bannerError}
+                />
+            }
             </View>
         </SafeAreaView>
     )

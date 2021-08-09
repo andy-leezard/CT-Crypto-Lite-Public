@@ -10,7 +10,7 @@ import { useNavigation } from '@react-navigation/core';
 
 const width = Dimensions.get("window").width-20;
 const screenHeight = Dimensions.get("window").height;
-const uri_fiatcoin = "https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/usd_custom.png?alt=media&token=857456bf-e06b-4fc6-95a2-72f1d69212dc";
+const uri_fiatcoin = "https://uri_fiat";
 
 const initialLimit = 15;
 
@@ -42,7 +42,7 @@ const Portfolio = ({username, userEmail, portfolio, ispro, bannerID, upgraded}) 
         return bool_isDarkMode() ? "#1c1c1c":"#e8e8e8";
     }
     const containerRadiusColor = () => {
-        return bool_isDarkMode() ? "#CCCCCC":"#4a4a4a";
+        return bool_isDarkMode() ? "#a196b5":"#8c829e";
     }
     const textColor = () => {
         return bool_isDarkMode() ? "#FFFFFF":"#000000";
@@ -53,11 +53,11 @@ const Portfolio = ({username, userEmail, portfolio, ispro, bannerID, upgraded}) 
     const sellColor = () => {
         return bool_isDarkMode() ? Env.sellColor_dark:Env.sellColor_light;
     }
-    const dynamicMargin = (noAd) => {
-        if(noAd){
-            return (Platform.OS === 'ios') ? 150:95;
+    const dynamicMargin = () => {
+        if(ispro){
+            return (Platform.OS === 'ios') ? 465:412;
         }else{
-            return (Platform.OS === 'ios') ? 215:155;
+            return (Platform.OS === 'ios') ? 525:472;
         }
     }
     const avoidDuplicate = (d) => Object.values(d).reduce((r, i) => !~r.indexOf(i) ? (r.push(i), r) : r , []);
@@ -141,9 +141,9 @@ const Portfolio = ({username, userEmail, portfolio, ispro, bannerID, upgraded}) 
 
 
     return (
-        <SafeAreaView  style={{flex:1, backgroundColor:bgColor()}}>
+        <SafeAreaView style={{flex:1, backgroundColor:bgColor()}}>
             <View>
-            <View style={{width:width,height:screenHeight-dynamicMargin(ispro), alignSelf:"center",marginTop:5}}>
+            <View style={{alignSelf:"center",marginTop:15}}>
             <View style={{flexDirection:"row",justifyContent:"space-between",}}>
                 <Text style={{color:textColor(),fontSize:20,fontWeight:"bold",marginBottom:10,marginTop:0}}>{username}'s portfolio</Text>
                 <TouchableOpacity onPress={()=>toggleViewStatus()}>
@@ -152,110 +152,113 @@ const Portfolio = ({username, userEmail, portfolio, ispro, bannerID, upgraded}) 
                 {(viewStatus===2) && <View style={{width:30,height:25,borderRadius:5,backgroundColor:"#CBCBCB",justifyContent:"center",alignItems:"center"}}><Image source={require("../assets/icons/1x/hide.png")} style={{width:20,height:20,tintColor:"#D65F3E"}}/></View>}
                 </TouchableOpacity>
             </View>
-                <View style={{width:width, borderRadius:10, borderWidth:2, borderColor:containerRadiusColor(), backgroundColor:containerColor(), padding:10,marginBottom:10,}}>
+                <View style={{width:width, borderRadius:10, borderWidth:3, borderColor:containerRadiusColor(), backgroundColor:containerColor(), padding:10,marginBottom:10,alignSelf:"center"}}>
                     <View style={{alignSelf:"center"}}>
-                        <View>
-                            <Text style={{color:textColor(),fontSize:16,fontWeight:"600",marginBottom:10,fontWeight:"bold"}}>Total value : ${conditionalRender(portfolio.totalAppreciation,0,6)} (fiat:{conditionalRender((dynamicRound((portfolio.seed/portfolio.totalAppreciation)*100,2)),1,2)}%)</Text>
-                            {(portfolio.piedata != undefined) && (<PieChart
-                                width={300}
-                                height={200}
-                                data={portfolio.piedata}
-                                accessor="appreciation"
-                                backgroundColor="transparent"
-                                paddingLeft="15"
-                                chartConfig={chartConfig}
-                                />
-                            )}
-                        </View>
+                        <Text style={{color:textColor(),fontSize:16,fontWeight:"600",marginBottom:10,fontWeight:"bold"}}>Total value : ${conditionalRender(portfolio.totalAppreciation,0,6)} (fiat:{conditionalRender((dynamicRound((portfolio.seed/portfolio.totalAppreciation)*100,2)),1,2)}%)</Text>
+                        {(portfolio.piedata != undefined) && (<PieChart
+                            width={width-40}
+                            height={200}
+                            data={portfolio.piedata}
+                            accessor="appreciation"
+                            backgroundColor="transparent"
+                            paddingLeft="15"
+                            chartConfig={chartConfig}
+                            />
+                        )}
                     </View>
                 </View>
                 {/*onPress={ toggle history }*/}
-                <ScrollView
-                    scrollEventThrottle={2000}
-                    onScroll={({nativeEvent})=>{
-                        if(isCloseToBottom(nativeEvent)){
-                            handleBottomClose();
-                    }
-                }}>
-                <TouchableOpacity onPress={()=>navigation.navigate('Stack_History',{email:userEmail})}>
-                <View style={{flexDirection:"row",justifyContent:"space-between",borderWidth:1,borderRadius:10,borderColor:containerRadiusColor(),backgroundColor:containerColor(), width:width, height:50,padding:5,marginBottom:10}}>
-                        <View style={{flexDirection:"row", width:((width/2)-15), alignItems:"center"}}>
-                            <Image source={require("../assets/icons/1x/Analytic.png")} style={{width:40,height:40,tintColor:"#40AAF2"}}/>
-                            <View style={{flexDirection:"column"}}>
-                                <Text style={{fontSize:15,fontWeight:"bold",color:textColor(),marginLeft:5}}>My PNL</Text>
-                                <Text style={{fontSize:15,fontWeight:"bold",color:textColor(),marginLeft:5}}>(All-time)</Text>
-                            </View>
-                        </View>
-                        <View style={{flexDirection:"column", width:((width/2)-15)}}>
-                            {(portfolio.pnl_const>=0) ? (
-                                <Text style={[styles.changetext, viewStatus>1 ? (bool_isDarkMode()? styles.changetext_neutral_dark:styles.changetext_neutral_light):{color:buyColor()}]}>{viewStatus<2 && "+"}{conditionalRender(portfolio.pnl_const,1,2)}%</Text>
-                                ):(
-                                <Text style={[styles.changetext, viewStatus>1 ? (bool_isDarkMode()? styles.changetext_neutral_dark:styles.changetext_neutral_light):{color:sellColor()}]}>{conditionalRender(portfolio.pnl_const,1,2)}%</Text>
-                            )}
-                            {(portfolio.pnl_const>=0) ? (
-                                <Text style={bool_isDarkMode()? styles.changetext_neutral_dark:styles.changetext_neutral_light}>{viewStatus<1 && "+"} ${conditionalRender(numberWithCommas(dynamicRound(portfolio.totalAppreciation-portfolio.totalbuyin_const,2)),0,6)}</Text>
-                            ):(
-                                <Text style={bool_isDarkMode()? styles.changetext_neutral_dark:styles.changetext_neutral_light}>{viewStatus<1 && "-"} ${conditionalRender(numberWithCommas(Math.abs(dynamicRound(portfolio.totalAppreciation-portfolio.totalbuyin_const,2))),0,6)}</Text>
-                            )}
-                        </View>
-                </View>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={triggerUpdatePNL}>
-                    <View style={{flexDirection:"row",justifyContent:"space-between",borderWidth:1,borderRadius:10,borderColor:containerRadiusColor(),backgroundColor:containerColor(), width:width, height:50,padding:5,marginBottom:10}}>
-                        <View style={{flexDirection:"row", width:((width/2)-15), alignItems:"center"}}>
-                            <Image source={require("../assets/icons/1x/Analytic.png")} style={{width:40,height:40,tintColor:"#40AAF2"}}/>
-                            <View style={{flexDirection:"column"}}>
-                                <Text style={{fontSize:15,fontWeight:"bold",color:textColor(),marginLeft:5}}>My PNL</Text>
-                                <Text style={{fontSize:15,fontWeight:"bold",color:textColor(),marginLeft:5}}>({portfolio.pnldate})</Text>
-                            </View>
-                            
-                        </View>
-                        <View style={{flexDirection:"column", width:((width/2)-15)}}>
-                            {(portfolio.pnl>=0) ? (
-                                <Text style={[styles.changetext, viewStatus>1 ? (bool_isDarkMode()? styles.changetext_neutral_dark:styles.changetext_neutral_light):{color:buyColor()}]}>{viewStatus<2 && "+"}{conditionalRender(portfolio.pnl,1,2)}%</Text>
-                                ):(
-                                <Text style={[styles.changetext, viewStatus>1 ? (bool_isDarkMode()? styles.changetext_neutral_dark:styles.changetext_neutral_light):{color:sellColor()}]}>{conditionalRender(portfolio.pnl,1,2)}%</Text>
-                            )}
-                            {(portfolio.pnl>=0) ? (
-                                <Text style={bool_isDarkMode()? styles.changetext_neutral_dark:styles.changetext_neutral_light}>{viewStatus<1 && "+"} ${conditionalRender(numberWithCommas(dynamicRound(portfolio.totalAppreciation-portfolio.totalbuyin,2)),0,6)}</Text>
-                            ):(
-                                <Text style={bool_isDarkMode()? styles.changetext_neutral_dark:styles.changetext_neutral_light}>{viewStatus<1 && "-"} ${conditionalRender(numberWithCommas(Math.abs(dynamicRound(portfolio.totalAppreciation-portfolio.totalbuyin,2))),0,6)}</Text>
-                            )}
-                        </View>
-                    </View>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={()=>navigation.navigate('Stack_History',{email:userEmail})}>
-                    <View style={{flexDirection:"row",justifyContent:"space-between",borderWidth:1,borderRadius:10,borderColor:containerRadiusColor(),backgroundColor:containerColor(), width:width, height:50,padding:5,marginBottom:10}}>
-                            <View style={{flexDirection:"row", width:((width/2)-15), alignItems:"center"}}>
-                                <Image source={{uri:uri_fiatcoin}} style={{width:40,height:40}}/>
-                                <Text style={{fontSize:15,fontWeight:"bold",color:textColor(),marginLeft:5}}>My virtual USD wallet</Text>
-                            </View>
-                            <View style={{flexDirection:"column", width:((width/2)-15)}}>
-                                <Text style={{fontSize:15,fontWeight:"bold",color:textColor(),marginRight:5,textAlign:"right"}}>${conditionalRender(numberWithCommas(dynamicRound(portfolio.seed,2)),0,6)}</Text>
-                                <Text style={{fontSize:15,fontWeight:"bold",color:containerRadiusColor(),marginRight:5,textAlign:"right"}}>{conditionalRender(portfolio.seed,0,6)} VUSD</Text>
-                        </View>
-                    </View>
-                </TouchableOpacity>
-                {walletdata.map((i, index)=>{
-                    //let keyList = [];
-                    if(i.id != "VUSD"){//&& !keyList.includes(i.id){keyList.push(i.id);}
-                    return(
-                        //onPress={ open trading view with i.name }
-                        <TouchableOpacity key={index} onPress={()=>navigation.navigate('Stack_Portfolio_Trading',{email:userEmail,imgurl:i.img,sparkline:i.spark,tradingCoin:i.name,coinprice:i.crntPrice,coinsymbol:i.id,upgraded:upgraded})}>
-                            <View style={{flexDirection:"row",justifyContent:"space-between",borderWidth:1,borderRadius:10,borderColor:containerRadiusColor(),backgroundColor:containerColor(), width:width, height:50,padding:5,marginBottom:10}}>
+                <View style={{height:screenHeight-dynamicMargin(),width:width,marginTop:1,marginBottom:1,alignSelf:"center",backgroundColor:containerColor(),borderRadius:10}}>
+                    <ScrollView
+                        scrollEventThrottle={2000}
+                        onScroll={({nativeEvent})=>{
+                            if(isCloseToBottom(nativeEvent)){
+                                handleBottomClose();
+                        }}}
+                    >
+                        <View style={{alignItems:"center"}}>
+                        <TouchableOpacity onPress={()=>navigation.navigate('Stack_History',{email:userEmail,ispro:ispro,bannerID:bannerID})}>
+                        <View style={{flexDirection:"row",justifyContent:"space-between",borderWidth:2,borderRadius:10,borderColor:containerRadiusColor(),backgroundColor:containerColor(), width:width-20, height:50,padding:5,marginTop:10}}>
                                 <View style={{flexDirection:"row", width:((width/2)-15), alignItems:"center"}}>
-                                    <Image source={{uri:i.img}} style={{width:40,height:40}}/>
-                                    <Text style={{fontSize:15,fontWeight:"bold",color:textColor(),marginLeft:5}}>My {i.id} wallet</Text>
+                                    <Image source={require("../assets/icons/1x/Analytic.png")} style={{width:32,height:32,tintColor:"#40AAF2",marginLeft:3}}/>
+                                    <View style={{flexDirection:"column"}}>
+                                        <Text style={{fontSize:15,fontWeight:"bold",color:textColor(),marginLeft:9}}>My PNL</Text>
+                                        <Text style={{fontSize:15,fontWeight:"bold",color:textColor(),marginLeft:9}}>(All-time)</Text>
+                                    </View>
                                 </View>
                                 <View style={{flexDirection:"column", width:((width/2)-15)}}>
-                                    <Text style={{fontSize:15,fontWeight:"bold",color:textColor(),marginRight:5,textAlign:"right"}}>${conditionalRender(numberWithCommas(dynamicRound(i.quantity*i.crntPrice,2)),0,6)}</Text>
-                                    <Text style={{fontSize:15,fontWeight:"bold",color:containerRadiusColor(),marginRight:5,textAlign:"right"}}>{conditionalRender(numberWithCommas(autoRound(i.quantity)),0,6)} {i.id}</Text>
+                                    {(portfolio.pnl_const>=0) ? (
+                                        <Text style={[styles.changetext, viewStatus>1 ? (bool_isDarkMode()? styles.changetext_neutral_dark:styles.changetext_neutral_light):{color:buyColor()}]}>{viewStatus<2 && "+"}{conditionalRender(portfolio.pnl_const,1,2)}%</Text>
+                                        ):(
+                                        <Text style={[styles.changetext, viewStatus>1 ? (bool_isDarkMode()? styles.changetext_neutral_dark:styles.changetext_neutral_light):{color:sellColor()}]}>{conditionalRender(portfolio.pnl_const,1,2)}%</Text>
+                                    )}
+                                    {(portfolio.pnl_const>=0) ? (
+                                        <Text style={bool_isDarkMode()? styles.changetext_neutral_dark:styles.changetext_neutral_light}>{viewStatus<1 && "+"} ${conditionalRender(numberWithCommas(dynamicRound(portfolio.totalAppreciation-portfolio.totalbuyin_const,2)),0,6)}</Text>
+                                    ):(
+                                        <Text style={bool_isDarkMode()? styles.changetext_neutral_dark:styles.changetext_neutral_light}>{viewStatus<1 && "-"} ${conditionalRender(numberWithCommas(Math.abs(dynamicRound(portfolio.totalAppreciation-portfolio.totalbuyin_const,2))),0,6)}</Text>
+                                    )}
+                                </View>
+                        </View>
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={triggerUpdatePNL}>
+                            <View style={{flexDirection:"row",justifyContent:"space-between",borderWidth:2,borderRadius:10,borderColor:containerRadiusColor(),backgroundColor:containerColor(), width:width-20, height:50,padding:5,marginTop:10}}>
+                                <View style={{flexDirection:"row", width:((width/2)-15), alignItems:"center"}}>
+                                    <Image source={require("../assets/icons/1x/Analytic.png")} style={{width:32,height:32,tintColor:"#40AAF2",marginLeft:3}}/>
+                                    <View style={{flexDirection:"column"}}>
+                                        <Text style={{fontSize:15,fontWeight:"bold",color:textColor(),marginLeft:9}}>My PNL</Text>
+                                        <Text style={{fontSize:15,fontWeight:"bold",color:textColor(),marginLeft:9}}>({portfolio.pnldate})</Text>
+                                    </View>
+                                    
+                                </View>
+                                <View style={{flexDirection:"column", width:((width/2)-15)}}>
+                                    {(portfolio.pnl>=0) ? (
+                                        <Text style={[styles.changetext, viewStatus>1 ? (bool_isDarkMode()? styles.changetext_neutral_dark:styles.changetext_neutral_light):{color:buyColor()}]}>{viewStatus<2 && "+"}{conditionalRender(portfolio.pnl,1,2)}%</Text>
+                                        ):(
+                                        <Text style={[styles.changetext, viewStatus>1 ? (bool_isDarkMode()? styles.changetext_neutral_dark:styles.changetext_neutral_light):{color:sellColor()}]}>{conditionalRender(portfolio.pnl,1,2)}%</Text>
+                                    )}
+                                    {(portfolio.pnl>=0) ? (
+                                        <Text style={bool_isDarkMode()? styles.changetext_neutral_dark:styles.changetext_neutral_light}>{viewStatus<1 && "+"} ${conditionalRender(numberWithCommas(dynamicRound(portfolio.totalAppreciation-portfolio.totalbuyin,2)),0,6)}</Text>
+                                    ):(
+                                        <Text style={bool_isDarkMode()? styles.changetext_neutral_dark:styles.changetext_neutral_light}>{viewStatus<1 && "-"} ${conditionalRender(numberWithCommas(Math.abs(dynamicRound(portfolio.totalAppreciation-portfolio.totalbuyin,2))),0,6)}</Text>
+                                    )}
                                 </View>
                             </View>
                         </TouchableOpacity>
-                    )}
-                })}
-                </ScrollView>
+                        <TouchableOpacity onPress={()=>navigation.navigate('Stack_History',{email:userEmail,ispro:ispro,bannerID:bannerID})}>
+                            <View style={{flexDirection:"row",justifyContent:"space-between",borderWidth:2,borderRadius:10,borderColor:containerRadiusColor(),backgroundColor:containerColor(), width:width-20, height:50,padding:5,marginTop:10}}>
+                                    <View style={{flexDirection:"row", width:((width/2)-15), alignItems:"center"}}>
+                                        <View style={{position:"absolute",width:38,height:38,borderRadius:8,backgroundColor:"white"}} />
+                                        <Image source={{uri:uri_fiatcoin}} style={{width:32,height:32,marginLeft:3}}/>
+                                        <Text style={{fontSize:15,fontWeight:"bold",color:textColor(),marginLeft:9}}>My virtual USD wallet</Text>
+                                    </View>
+                                    <View style={{flexDirection:"column", width:((width/2)-15)}}>
+                                        <Text style={{fontSize:15,fontWeight:"bold",color:textColor(),marginRight:5,textAlign:"right"}}>${conditionalRender(numberWithCommas(dynamicRound(portfolio.seed,2)),0,6)}</Text>
+                                        <Text style={[bool_isDarkMode()? styles.changetext_neutral_dark:styles.changetext_neutral_light,{fontSize:15,fontWeight:"bold",marginRight:5,textAlign:"right"}]}>{conditionalRender(portfolio.seed,0,6)} VUSD</Text>
+                                </View>
+                            </View>
+                        </TouchableOpacity>
+                        {walletdata.map((i, index)=>{
+                            if(i.id != "VUSD"){
+                            return(
+                                <TouchableOpacity key={index} onPress={()=>navigation.navigate('Stack_Portfolio_Trading',{email:userEmail,imgurl:i.img,sparkline:i.spark,tradingCoin:i.name,coinprice:i.crntPrice,coinsymbol:i.id,upgraded:upgraded,bannerID:bannerID,ispro:ispro})}>
+                                    <View style={{flexDirection:"row",justifyContent:"space-between",borderWidth:2,borderRadius:10,borderColor:containerRadiusColor(),backgroundColor:containerColor(), width:width-20, height:50,padding:5,marginTop:10}}>
+                                        <View style={{flexDirection:"row", width:((width/2)-15), alignItems:"center"}}>
+                                            <View style={{position:"absolute",width:38,height:38,borderRadius:8,backgroundColor:"white"}} />
+                                            <Image source={{uri:i.img}} style={{width:32,height:32,marginLeft:3}}/>
+                                            <Text style={{fontSize:15,fontWeight:"bold",color:textColor(),marginLeft:9}}>My {i.id} wallet</Text>
+                                        </View>
+                                        <View style={{flexDirection:"column", width:((width/2)-15)}}>
+                                            <Text style={{fontSize:15,fontWeight:"bold",color:textColor(),marginRight:5,textAlign:"right"}}>${conditionalRender(numberWithCommas(dynamicRound(i.quantity*i.crntPrice,2)),0,6)}</Text>
+                                            <Text style={[bool_isDarkMode()? styles.changetext_neutral_dark:styles.changetext_neutral_light,{fontSize:15,fontWeight:"bold",marginRight:5,textAlign:"right"}]}>{conditionalRender(numberWithCommas(autoRound(i.quantity)),0,6)} {i.id}</Text>
+                                        </View>
+                                    </View>
+                                </TouchableOpacity>
+                            )}
+                        })}
+                        <View style={{height:10}}/>
+                        </View>
+                    </ScrollView>
+                </View>
             </View>
             <View style={{alignSelf:"center"}}>
                 {!ispro && 

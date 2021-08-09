@@ -12,15 +12,14 @@ import PortfolioScreen from './screens/PortfolioScreen';
 import LoadingScreen from '../Auth/LoadingScreen';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { KeyboardAvoidingView } from 'react-native';
-import * as firebase from "firebase";
 
 const Tab = createBottomTabNavigator();
 
-const android_banner = "ca-app-pub-2294308974784218/5447463023";
-const ios_banner = "ca-app-pub-2294308974784218/9054168564";
+const android_banner = "ca-app-pub-xxxxxxxxxxxxxxxx/xxxxxxxxxx";
+const ios_banner = "ca-app-pub-xxxxxxxxxxxxxxxx/xxxxxxxxxx";
 
-const android_banner_test = "ca-app-pub-xxxxxxxxxxxxxxxx/xxxxxxxxxx";
-const ios_banner_test = "ca-app-pub-xxxxxxxxxxxxxxxx/xxxxxxxxxx";
+const android_banner_test = "ca-app-pub-3940256099942544/6300978111";
+const ios_banner_test = "ca-app-pub-3940256099942544/2934735716";
 const bool_AD_is_test = true;
 
 const MainController = ({coindata, userEmail, changedata}) => {
@@ -34,32 +33,31 @@ const MainController = ({coindata, userEmail, changedata}) => {
     const [totalbuyin, setTotalbuyin] = useState();
     const [totalbuyin_const, setTotalbuyin_const] = useState();
     const [pnldate, setPNLdate] = useState();
-    
     const [postData, setPostData] = useState([]);
     const [fav, setFav] = useState([]);
     const [boughtPro, setBoughtPro] = useState();
-    const ref = db.collection('users').doc(userEmail);
 
     useEffect(() => {
-        ref.update({lastActicity:firebase.firestore.FieldValue.serverTimestamp()}).catch((err)=>{console.log(err);})
+      const ref = db.collection('users').doc(userEmail);
         const unsubscribe = ref.onSnapshot((doc)=>{
+
             const thepin = doc.data().pin ?? "error";
+            const theseed = doc.data().seed;
+            const postData_local = [];
+            const nameOnly_local = ['VUSD'];
             (thepin!=="error") && setPincode(thepin);
             console.log("pin : "+thepin);
             console.log("snapshot triggered at",new Date().toLocaleString());
             setUsername(doc.data().username);
             setRequirePIN(doc.data().requirepin);
-            const theseed = doc.data().seed;
             setSeed(theseed);
             setProversion(doc.data().pro);
             setBoughtPro(doc.data().boughtPro);
             setFav(doc.data().favorites);
-
-            const postData_local = [];
-            const nameOnly_local = ['VUSD'];
             setTotalbuyin(doc.data().totalbuyin);
             setTotalbuyin_const(doc.data().totalbuyin_constant);
             setPNLdate(doc.data().pnldate);
+
             ref.collection('wallet').where("quantity", ">", 0).get()
                   .then((querySnapshot) => {
                       querySnapshot.forEach((doc) => {
@@ -74,7 +72,7 @@ const MainController = ({coindata, userEmail, changedata}) => {
                   })
         });
         return unsubscribe;
-    }, [coindata, userEmail, changedata])
+    }, [userEmail])
 
     const bannerAdId = () => {
       if(bool_AD_is_test){
@@ -94,8 +92,14 @@ const MainController = ({coindata, userEmail, changedata}) => {
     const bgColor = () => {
       return bool_isDarkMode() ? "#000000":"#FFFFFF";
     }
-    const focusedColor = () => {
+    const brandColor = () => {
       return bool_isDarkMode() ? Env.brandText_Dark:Env.brandText_Light;
+    }
+    const focusedColor = () => {
+      return bool_isDarkMode() ? Env.tab_focus_Dark:Env.tab_focus_Light;
+    }
+    const unfocusedColor = () => {
+      return bool_isDarkMode() ? "#dbdbdb":"#454545";
     }
     const textColor = () => {
       return bool_isDarkMode() ? "#FFFFFF":"#000000";
@@ -119,12 +123,13 @@ const MainController = ({coindata, userEmail, changedata}) => {
                     style={[{width:40,height:40},(Platform.OS === 'ios') && {borderRadius:5}]}
                     />
                 </View>
-                <Text style={{color:focusedColor(),marginBottom:40,fontSize:20,fontWeight:"bold"}}>CoinTracer</Text>
+                <Text style={[{color:brandColor(),marginBottom:40,fontSize:20,fontWeight:"bold"},(Platform.OS === 'ios') && {marginTop:5}]}>CoinTracer</Text>
                 <View style={{width:300, alignItems:"center"}}>
                   <TextInput
                       style={[styles.input,bool_isDarkMode()?styles.darkTheme:styles.lightTheme]}
                       autoFocus={true}
                       placeholder="PIN code"
+                      keyboardType="numeric"
                       value={pinAnswer}
                       onChangeText={setPinAnswer}
                       maxLength = {8}
@@ -135,8 +140,8 @@ const MainController = ({coindata, userEmail, changedata}) => {
                   <Text style={styles.appButtonText}>Back</Text>
                 </TouchableOpacity>
                 <View>
-                    <Text style={{color:focusedColor(),fontSize:14,fontWeight:"600",marginTop:20, alignSelf:"center"}}>© 2021 | Developed by Andy Lee</Text>
-                    <Text style={{color:focusedColor(),fontSize:12,fontWeight:"600",marginTop:10, alignSelf:"center"}}>{Env.currentVersion}</Text>
+                    <Text style={{color:brandColor(),fontSize:14,fontWeight:"600",marginTop:20, alignSelf:"center"}}>© 2021 | Developed by Andy Lee</Text>
+                    <Text style={{color:brandColor(),fontSize:12,fontWeight:"600",marginTop:10, alignSelf:"center"}}>{Env.currentVersion}</Text>
                 </View>
               </View>
             </KeyboardAvoidingView>
@@ -177,11 +182,11 @@ const MainController = ({coindata, userEmail, changedata}) => {
                   style={{
                     width: 20,
                     height: 20,
-                    tintColor: focused ? focusedColor() : textColor(),
+                    tintColor: focused ? focusedColor() : unfocusedColor(),
                   }}
                 />
                 <Text
-                  style={{color:focused ? focusedColor() : textColor(), fontSize: 10}}
+                  style={{color:focused ? focusedColor() : unfocusedColor(), fontSize: 10}}
                 >
                   Prices
                 </Text>
@@ -201,7 +206,7 @@ const MainController = ({coindata, userEmail, changedata}) => {
                   style={{
                     width: 40,
                     height: 40,
-                    tintColor: focused ? focusedColor() : textColor(),
+                    tintColor: focused ? focusedColor() : unfocusedColor(),
                   }}
                 />
               </View>
@@ -220,11 +225,11 @@ const MainController = ({coindata, userEmail, changedata}) => {
                   style={{
                     width: 20,
                     height: 20,
-                    tintColor: focused ? focusedColor() : textColor(),
+                    tintColor: focused ? focusedColor() : unfocusedColor(),
                   }}
                 />
                 <Text
-                  style={{color:focused ? focusedColor() : textColor(), fontSize: 10}}
+                  style={{color:focused ? focusedColor() : unfocusedColor(), fontSize: 10}}
                 >
                   Settings
                 </Text>

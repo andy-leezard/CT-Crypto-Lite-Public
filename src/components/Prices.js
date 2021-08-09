@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Image, Dimensions, ScrollView, TextInput, Platform } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Image, Dimensions, ScrollView, TextInput, Platform, Picker } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import Favorite_icon from './Favorite_icon';
@@ -9,27 +9,55 @@ import { db } from '../../firebase';
 import { useColorScheme } from "react-native-appearance";
 import { useNavigation } from '@react-navigation/core';
 import { AdMobBanner} from 'expo-ads-admob';
+import ReactNativePickerModule from "react-native-picker-module";
+import stablecoins from '../stablecoins.json';
 
 const initialLimit = 20;
-
-const dataIntervalListTab = [
-    {interval: "1h",/*1h = hour*/},{interval: "d",/*24h = hours*/},
-    {interval: "w",/*7d = week*/},{interval: "2w",/*14d = couple of weeks*/},
-    {interval: "m",/*30d = month*/},{interval: "200d",/*200d = 200 days*/},{interval: "y",/*1y = year*/}
-];
 const listTab = [
     {status: "Prices",},{status: "Market Cap",},{status: "24H",},
 ];
+
+const options = [
+    {
+      value: '1h',
+      label: "hour",
+    },
+    {
+      value: "24h",
+      label: "24 hours",
+    },
+    {
+      value: "7d",
+      label: "week",
+    },
+    {
+      value: "14d",
+      label: "couple of weeks",
+    },
+    {
+      value: "30d",
+      label: "month",
+    },
+    {
+      value: "200d",
+      label: "200 days",
+    },
+    {
+      value: "1y",
+      label: "year",
+    },
+];
+const screenWidth = Dimensions.get("window").width;
 
 const Prices = ({userEmail,fav,coindata,changeData,ispro,bannerID,upgraded}) => {
     const navigation = useNavigation();
     const [status, setStatus] = useState("Prices"); //By default we want to show all status
     const [renderFavorites, setRenderFavorites] = useState(false);
     const [keyword, setkeyword] = useState('');
-    const [datainterval, setdatainterval] = useState("d");
-    const [heretoDatainterval, setRenderIntervalOptions] = useState(false);
+    const [datainterval, setdatainterval] = useState("24h");
     const [limit, setlimit] = useState(initialLimit);
     const scrollViewRef = useRef();
+    const pickerRef =  useRef();
 
     const scheme = useColorScheme();
     const bool_isDarkMode = () => {
@@ -41,8 +69,8 @@ const Prices = ({userEmail,fav,coindata,changeData,ispro,bannerID,upgraded}) => 
     const containerColor = () => {
         return bool_isDarkMode() ? "#1A1A1A":"#E3E3E3";
     }
-    const brandTextColor = () => {
-        return bool_isDarkMode() ? Env.brandText_Dark:Env.brandText_Light;
+    const inputRadiusColor = () => {
+        return bool_isDarkMode() ? "#383838":"#8c829e";
     }
     const textColor = () => {
         return bool_isDarkMode() ? "#FFFFFF":"#000000";
@@ -57,7 +85,7 @@ const Prices = ({userEmail,fav,coindata,changeData,ispro,bannerID,upgraded}) => 
         return bool_isDarkMode() ? Env.sellColor_dark:Env.sellColor_light;
     }
     const intervalContainerColor = () => {
-        return bool_isDarkMode() ? "#333333":"#737373";
+        return bool_isDarkMode() ? "#FFFFFF":"#bdbeff";
     }
     const handleKeyword = (input) => {
         setkeyword(input.trimStart());ScrollBackToTop();
@@ -71,32 +99,23 @@ const Prices = ({userEmail,fav,coindata,changeData,ispro,bannerID,upgraded}) => 
         });
     }
 
-    const ParseInterval = (i) => {
-        if(i === "1h"){return "hour";}else if(i === "d"){return "24 hours";}
-        else if(i === "w"){return "week";}else if(i === "2w"){return "couple of weeks";}
-        else if(i === "m"){return "month";}else if(i === "200d"){return "200 days";}
-        else if(i === "y"){return "year";}else{return "error : 404";}
-    }
-
     const ParseIntervalForAPI = (i) => {
-        if(i === "d"){return "24h";}else if(i === "w"){return "7d";}
-        else if(i === "2w"){return "14d";}else if(i === "m"){return "30d";}
-        else if(i === "200d"){return "200d";}else if(i === "y"){return "1y";}else{return i;}
+        if(i === "hour"){return "1h"} else if(i === "24 hours"){return "24h";}
+        else if(i === "week"){return "7d";}else if(i === "couple of weeks"){return "14d";}
+        else if(i === "month"){return "30d";}else if(i === "200 days"){return "200d";}
+        else if(i === "year"){return "1y";}else{return i;}
+    }
+    const ParseInterval = (i) => {
+        if(i === "1h"){return "hour"} else if(i === "24h"){return "24 hours";}
+        else if(i === "7d"){return "week";}else if(i === "14d"){return "couple of weeks";}
+        else if(i === "30d"){return "month";}else if(i === "200d"){return "200 days";}
+        else if(i === "1y"){return "year";}else{return i;}
     }
 
     const setStatusFilter = (status) => {
         ScrollBackToTop();
         setStatus(status);console.log("status set to :",status);
         setlimit(initialLimit);
-    }
-
-    const setIntervalFilter = (i) => {
-        setdatainterval(i);console.log("interval set to :",i);
-    }
-
-    const toggleRenderDataInterval = () => {
-        let state = heretoDatainterval;
-        setRenderIntervalOptions(!state);
     }
 
     const toggleRenderFavorites = () => {
@@ -114,9 +133,9 @@ const Prices = ({userEmail,fav,coindata,changeData,ispro,bannerID,upgraded}) => 
 
     const dynamicMargin = () => {
         if(Platform.OS === "ios"){
-            return (ispro) ? 241:403;
+            return (ispro) ? 318:378;
         }else{
-            return (ispro) ? 290:348;
+            return (ispro) ? 264:324;
         }
     }
 
@@ -142,32 +161,6 @@ const Prices = ({userEmail,fav,coindata,changeData,ispro,bannerID,upgraded}) => 
 
     const handleBottomClose = () => {
         (limit<=230) ? setlimit(limit + 20):setlimit(250);
-    }
-
-    const DataIntervalOptions = () => {
-        return(
-            <ScrollView style={{flexDirection:"row"}} horizontal={true}>
-                <Text style={{color:textColor(),fontWeight:"600",fontSize:16,textAlign:"left"}}>
-                    In the past
-                </Text>
-                <Text> </Text>
-                <TouchableOpacity style={{backgroundColor:"#428b8f",borderRadius:3,paddingHorizontal:5}} onPress={()=>toggleRenderDataInterval()}>
-                    <Text style={{color:"white",fontWeight:"bold",fontSize:15,textAlign:"left"}}>
-                        {ParseInterval(datainterval)}
-                    </Text>
-                </TouchableOpacity>
-                {(heretoDatainterval)&&(
-                    <View  style={{flexDirection:"row",justifyContent:"space-between",backgroundColor:intervalContainerColor(),borderRadius:5,marginLeft:5}}>
-                        {dataIntervalListTab.map((e) => (
-                            <TouchableOpacity key={e.interval} style={[styles.interval_btnTab, (datainterval===e.interval && bool_isDarkMode())&&{backgroundColor:"#ffffff"},(datainterval===e.interval && !bool_isDarkMode())&&{backgroundColor:"#2294DB"}]} onPress={()=>setIntervalFilter(e.interval)}>
-                                <Text style={[styles.interval_text, (datainterval===e.interval && bool_isDarkMode())&&styles.interval_textActive, (!bool_isDarkMode())&&{color:"#FFFFFF"},(datainterval!==e.interval && bool_isDarkMode())&&{color:"#CCCCCC"}]}>{e.interval}</Text>
-                            </TouchableOpacity>
-                        
-                        ))}
-                    </View>
-                )}
-            </ScrollView>
-        )
     }
 
     const ParseChangeByInterval = (i) => {
@@ -228,10 +221,12 @@ const Prices = ({userEmail,fav,coindata,changeData,ispro,bannerID,upgraded}) => 
             activeColor24price = sellColor();
         }
 
-        return(<View style={{width:135}}>
+        return(
+        <View style={{width:135}}>
             <Text style={{color:activeColor24price,fontSize:17,fontWeight:"bold",textAlign:"right"}}>{(status==="Market Cap") ? vol_str:prix}</Text>
             <Text style={{color:textColor(),fontSize:12,fontWeight:"bold",color:activeColor24price,textAlign:"right"}}>{asString24price}</Text>
-        </View>)
+        </View>
+        )
     }
 
     const RenderByOption = () => {
@@ -242,9 +237,13 @@ const Prices = ({userEmail,fav,coindata,changeData,ispro,bannerID,upgraded}) => 
         if(keyword.length > 0){
             finaldata = finaldata.filter(i => i.name.toLowerCase().includes(keyword.toLowerCase()) || i.symbol.toLowerCase().includes(keyword.toLowerCase()));
         }
+        if(keyword.length === 0 && !renderFavorites && status !== 'Market Cap'){
+            finaldata = finaldata.filter(i => !stablecoins.some(item => item.name === i.name));
+        }
         if(status === '24H'){
             finaldata = finaldata.sort((a, b) => Math.abs(b.price_change_percentage_24h) - Math.abs(a.price_change_percentage_24h));
         }
+
         finaldata = finaldata.slice(0, limit);
         return(
             <>
@@ -261,7 +260,7 @@ const Prices = ({userEmail,fav,coindata,changeData,ispro,bannerID,upgraded}) => 
                             </View>
                             {isInFavorite(coin.name) && (<Favorite_icon w={10} h={10}/>)}
                         </TouchableOpacity>
-                        <TouchableOpacity style={{flex:1,marginLeft:10, alignSelf:"center"}} onPress={()=>navigation.navigate('Stack_Prices_Trading',{email:userEmail,imgurl:coin.image,sparkline:coin.sparkline_in_7d.price,tradingCoin:coin.name,coinprice:coin.current_price,coinsymbol:coin.symbol.toUpperCase(),upgraded:upgraded})}>
+                        <TouchableOpacity style={{flex:1,marginLeft:10, alignSelf:"center"}} onPress={()=>navigation.navigate('Stack_Prices_Trading',{email:userEmail,imgurl:coin.image,sparkline:coin.sparkline_in_7d.price,tradingCoin:coin.name,coinprice:coin.current_price,coinsymbol:coin.symbol.toUpperCase(),upgraded:upgraded,bannerID:bannerID,ispro:ispro})}>
                             {(coin.name.length<=17)?(
                                 <Text style={{color:textColor(),fontSize:17,fontWeight:"bold"}}>{coin.name}</Text>
                             ):(
@@ -270,7 +269,7 @@ const Prices = ({userEmail,fav,coindata,changeData,ispro,bannerID,upgraded}) => 
                             <Text style={{color:subTextColor(),fontSize:14,fontWeight:"bold"}}>{coin.symbol.toUpperCase()}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity style={{flexDirection:"row", justifyContent:"space-between", alignSelf:"center", marginRight:15}}
-                                onPress={()=>navigation.navigate('Stack_Prices_Trading',{email:userEmail,imgurl:coin.image,sparkline:coin.sparkline_in_7d.price,tradingCoin:coin.name,coinprice:coin.current_price,coinsymbol:coin.symbol.toUpperCase(),upgraded:upgraded})}>
+                                onPress={()=>navigation.navigate('Stack_Prices_Trading',{email:userEmail,imgurl:coin.image,sparkline:coin.sparkline_in_7d.price,tradingCoin:coin.name,coinprice:coin.current_price,coinsymbol:coin.symbol.toUpperCase(),upgraded:upgraded,bannerID:bannerID,ispro:ispro})}>
                             <ParseChangeByInterval
                                 change1h = {coin.price_change_percentage_1h_in_currency}
                                 change24h = {coin.price_change_percentage_24h_in_currency}
@@ -295,25 +294,83 @@ const Prices = ({userEmail,fav,coindata,changeData,ispro,bannerID,upgraded}) => 
         <StatusBar style="auto"/>
         <View>
             <View style={{alignItems:"center"}}>
-                <TouchableOpacity style={{alignItems:"center"}} onPress={()=>tryrefresh()}>
+                <TouchableOpacity style={{alignItems:"center"}}>
                     <Image
                         source={require('../assets/icon.png')}
-                        style={[{width:25,height:25,marginBottom:5,marginTop:-5,},(Platform.OS === 'ios') && {borderRadius:5}]}
+                        style={[{width:25,height:25,marginTop:-5,},(Platform.OS === 'ios') && {borderRadius:5}]}
                     />
-                    <Text style={{color:brandTextColor(),marginBottom:5,fontSize:10,fontWeight:"bold"}}>CoinTracer</Text>
                 </TouchableOpacity>
             </View>
-            <View style={{paddingHorizontal:20,marginBottom:10}}>
-                <View style={{paddingTop:10}}>
-                    <DataIntervalOptions/>
-                    <View style={{flexDirection:"row",justifyContent:"space-between",paddingTop:5}}>
-                        <Trace_RenderGlobalChange propdata={changeData} darkmode={bool_isDarkMode()}/>
+            <View style={{paddingHorizontal:15,marginBottom:10}}>
+                <View style={{marginTop:10}}>
+                    <View style={[{flexDirection:"row"},Platform.OS === 'android' && {width:screenWidth-30,height:22}]}>
+                        {Platform.OS === 'ios' && (<Text style={{color:textColor(),fontWeight:"600",fontSize:16,textAlign:"left"}}>
+                            In the past
+                        </Text>)}
+                        {Platform.OS === 'ios' && (<TouchableOpacity style={{backgroundColor:intervalContainerColor(),borderRadius:3,paddingHorizontal:5,marginLeft:5}} onPress={()=>pickerRef.current.show()}>
+                            <Text style={{color:"#000000",fontWeight:"bold",fontSize:15,textAlign:"left"}}>
+                                {ParseInterval(datainterval)}
+                            </Text>
+                        </TouchableOpacity>)}
+
+                        {Platform.OS === 'android' &&(
+                            <>
+                                <Text style={{color:textColor(),fontWeight:"600",fontSize:16,textAlign:"left"}}>
+                                    In the past
+                                </Text>
+                                <Picker
+                                    onValueChange={i => {
+                                        setdatainterval(i);
+                                        console.log("set data interval : ",i);
+                                    }}
+                                    selectedValue={datainterval}
+                                    style={{width:screenWidth-83,height:22,marginLeft:-5,color:textColor()}}
+                                    mode='dropdown'
+                                >
+                                    {options.map((i)=>{
+                                        return (<Picker.Item key={i.label} label={i.label} value={i.value} />)
+                                    })}
+                                </Picker>
+                            </>
+                        )}
+
+                        <ReactNativePickerModule
+                            pickerRef={pickerRef}
+                            value={datainterval}
+                            title={"Select a time frame"}
+                            items={options}
+                            titleStyle={{ color: "white" }}
+                            itemStyle={{ color: "white" }}
+                            selectedColor="#FFCC00"
+                            confirmButtonEnabledTextStyle={{ color: "white" }}
+                            confirmButtonDisabledTextStyle={{ color: "grey" }}
+                            cancelButtonTextStyle={{ color: "white" }}
+                            confirmButtonStyle={{
+                            backgroundColor: "rgba(0,0,0,1)",
+                            }}
+                            cancelButtonStyle={{
+                            backgroundColor: "rgba(0,0,0,1)",
+                            }}
+                            contentContainerStyle={{
+                            backgroundColor: "rgba(0,0,0,1)",
+                            }}
+                            onCancel={() => {
+                                console.log("Cancelled")
+                            }}
+                            onValueChange={value => {
+                                console.log("value: ", value)
+                                setdatainterval(value);
+                            }}
+                        />
                     </View>
+                    <TouchableOpacity style={{flexDirection:"row",justifyContent:"space-between",paddingTop:5}} onPress={()=>navigation.navigate('Stack_Prices_Global',{changeData:changeData,coinData:coindata,ispro:ispro,bannerID:bannerID,upgraded:upgraded,userEmail:userEmail})}>
+                        <Trace_RenderGlobalChange propdata={changeData} darkmode={bool_isDarkMode()}/>
+                    </TouchableOpacity>
                 </View>
             </View>
-            <View style={{flexDirection:"row",justifyContent:"space-between",alignItems:"center",marginBottom:5, width:Dimensions.get("window").width,height:35}}>
+            <View style={{flexDirection:"row",justifyContent:"space-between",alignItems:"center",marginBottom:5, width:screenWidth,height:35}}>
                 <TextInput
-                    style={[styles.input,{backgroundColor:containerColor(),color:textColor(),height:35}]}
+                    style={[styles.input,{borderColor:inputRadiusColor(),backgroundColor:containerColor(),color:textColor(),height:35}]}
                     label="keyword"
                     value={keyword}
                     onChangeText={(text)=>{handleKeyword(text);}}
@@ -342,7 +399,7 @@ const Prices = ({userEmail,fav,coindata,changeData,ispro,bannerID,upgraded}) => 
                     ))}
                 </View>
             </View>
-            <View style={{height:Dimensions.get("window").height-dynamicMargin(),width:Dimensions.get("window").width-20,marginTop:1,marginBottom:1,alignSelf:"center",backgroundColor:containerColor(),borderRadius:10}}>
+            <View style={{height:Dimensions.get("window").height-dynamicMargin(),width:screenWidth-20,marginTop:1,marginBottom:1,alignSelf:"center",backgroundColor:containerColor(),borderRadius:10}}>
                 <ScrollView
                 ref={scrollViewRef}
                 //onLayout={() => scrollViewRef.current.scrollToEnd()}
@@ -368,6 +425,7 @@ const Prices = ({userEmail,fav,coindata,changeData,ispro,bannerID,upgraded}) => 
                 />
             }
             </View>
+            {/*<View style={{backgroundColor:"red",height:150,width:screenWidth}}/>*/}
         </View>
         </SafeAreaView>
     )
@@ -384,7 +442,7 @@ const styles = StyleSheet.create({
         width:"100%",
     },
     btnTab:{
-        width:(Dimensions.get("window").width-20)/3,
+        width:(screenWidth-20)/3,
         flexDirection:"row",
         padding:5,
         justifyContent:"center",
@@ -392,14 +450,14 @@ const styles = StyleSheet.create({
         height:"100%",
     },
     btnTabActive:{
-        backgroundColor:"#a6c4ff",
+        backgroundColor:"#bdbeff",
     },
     input: {
-        width:Dimensions.get("window").width-57,
+        width:screenWidth-57,
         marginLeft:10,
         paddingHorizontal: 10,
         paddingLeft:30,
-        borderWidth: 1,
+        borderWidth: 2,
         borderRadius: 10,
         fontSize:15,
     },

@@ -19,5 +19,29 @@
     },
     {
       "name": "HUSD"
+    },
+    {
+      "name": "TrueUSD"
+    },
+    {
+      "name": "Paxos Standard"
+    },
+    {
+      "name": "Neutrino USD"
+    },
+    {
+      "name": "Fei Protocol"
+    },
+    {
+      "name": "Gemini Dollar"
+    },
+    {
+      "name": "Frax"
+    },
+    {
+      "name": "sUSD"
+    },
+    {
+      "name": "Alchemix USD"
     }
 ]
