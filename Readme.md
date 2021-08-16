@@ -1,6 +1,6 @@
 # CoinTracer_Public Repository
 
-CoinTracer is a cross-platform mobile app for crypto investment simulation built on React Native by Andy Lee in 2021.
+CoinTracer is a cross-platform mobile app for crypto investment simulation built on React Native and published on both AppStore and Google Play by Andy Lee in 2021.
 
 Version: 1.0.5 iOS and Android (last updated: August 16 2021)
 
