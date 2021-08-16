@@ -44,9 +44,7 @@ This repository which does not, and will not contain some of its original source
 This app does not operate actual cryptocurrency trading services and is built simply and purely for educational & recreational purposes to help people try out simulated cryptocurrency investment.
 
 # Privacy
-This app stores data that is directly provided by the user in the backend server storage. The user data can be permanently deleted on demand. All deleted user data is irrecoverable. You can delete your account at any time.
-
-Soon to be available on AppStore and Google Play.
+This app stores data that is directly provided by the user in the backend server storage. The user data can be permanently deleted on demand by deleting your account. All deleted user data is irrecoverable.
 
 # Images from Android virtual machine
 ![Screenshot1](https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/screenshots%2FAndroid%2Fandroid_1024_500.png?alt=media&token=62272944-fffc-49b0-a52b-46e337ffe67e)
