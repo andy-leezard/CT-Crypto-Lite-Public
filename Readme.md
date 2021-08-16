@@ -47,11 +47,5 @@ This app stores data that is directly provided by the user in the backend server
 Soon to be available on AppStore and Google Play.
 
 # Images from Android virtual machine
-![Screenshot1](https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/Screenshot_1.png?alt=media&token=0f4a1849-ff7b-4c75-9665-36c0ab0b4811)
-![Screenshot2](https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/Screenshot_2.png?alt=media&token=02ed1b55-65a7-4083-8301-de931fe9aca3)
-![Screenshot3](https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/Screenshot_3.png?alt=media&token=6745c704-8d38-422a-b582-66ea878a838f)
-![Screenshot4](https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/Screenshot_4.png?alt=media&token=9163fe35-98f9-48d4-b06b-454d99eda3e8)
-![Screenshot5](https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/Screenshot_5.png?alt=media&token=f4fbd2fc-7252-478d-b34a-640b9ff5762b)
-![Screenshot6](https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/Screenshot_6.png?alt=media&token=a712276c-381b-4e17-837d-980a2292817a)
-![Screenshot7](https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/Screenshot_7.png?alt=media&token=26089228-f851-4cd6-872b-75cc8681db51)
-![Screenshot8](https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/Screenshot_8.png?alt=media&token=b426412a-fdae-4e3e-a2f3-3f4eb77a28f6)
+![Screenshot1](https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/screenshots%2FAndroid%2Fandroid_1024_500.png?alt=media&token=62272944-fffc-49b0-a52b-46e337ffe67e)
+![Screenshot2](https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/screenshots%2FAndroid%2F9_16_4.jpg?alt=media&token=614c5de0-fbda-4527-acda-ef52b9d3a519)
