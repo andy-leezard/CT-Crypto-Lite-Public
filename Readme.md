@@ -7,7 +7,9 @@ Version: 1.0.5 iOS and Android (last updated: August 16 2021)
 Now officially supports : 1000+ cryptocurrencies, dark mode on any device including tablets, email verification.
 
 <p align="center">
+<img src="https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/icons%2Ficons8-logo-ios-480.png?alt=media&token=7af2735f-f60f-4238-8992-b8ccb4193fe9" alt="iOS" width="84" height="84">
 <img src="https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/icon_rounded.png?alt=media&token=1b73b603-bd27-4c83-b753-cc601e812806" alt="Logo" width="96" height="96">
+<img src="https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/icons%2Ficons8-logo-android-480.png?alt=media&token=d2b8685e-7dc0-43c2-8856-8087b2c2fd52" alt="Android" width="84" height="84">
 </p>
 <p float="left">
 <img src="https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/screenshots%2FiOS%2F4_1242_2688.jpg?alt=media&token=1e42f5f3-3efa-4ab4-9a35-1180843746d7" alt="Screenshot_1" width="259" height="560">
