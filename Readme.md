@@ -1,8 +1,10 @@
 # CoinTracer_Public Repository
 
 CoinTracer is a cross-platform mobile app for crypto investment simulation built on React Native by Andy Lee in 2021.
+
 Version: 1.0.5 iOS and Android (last updated: August 16 2021)
-Now supports : 1000+ cryptocurrencies, dark mode on any device, email verification.
+
+Now officially supports : 1000+ cryptocurrencies, dark mode on any device including tablets, email verification.
 
 <p align="center">
 <img src="https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/icon_rounded.png?alt=media&token=1b73b603-bd27-4c83-b753-cc601e812806" alt="Logo" width="96" height="96">
