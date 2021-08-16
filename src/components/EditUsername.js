@@ -1,8 +1,9 @@
 import React, {useState} from 'react';
 import { StyleSheet, Text, View, Alert, TouchableOpacity, TextInput, Dimensions, Image } from 'react-native';
 import { db } from '../../firebase';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useColorScheme } from "react-native-appearance";
+
+const screenWidth = Dimensions.get("window").width;
 
 const EditUsername = ({route, navigation}) => {
     const scheme = useColorScheme();
@@ -13,27 +14,27 @@ const EditUsername = ({route, navigation}) => {
 
     const confirmNewUsername = () => {
         if(newusername.trimStart()===""){//.trimStart() remove spaces for the beginning part of the string.
-            toggleConfigureUsername();
-            console.log("cancel new username");
+            setRedoInfo_username(true);
+            setmsg_username_error("Incorrect format");
             return;
-        } 
+        }
         if(newusername.length<2){
             setRedoInfo_username(true);
             setmsg_username_error("error - username too short");
             return;
         }
+        let _newUsername = newusername.trimStart();
         db
             .collection('users')
             .doc(email)
             .update({
-                username: newusername,
+                username: _newUsername,
             })
             .then(()=> {
                 setRedoInfo_username(false);
-                  //console.log("PIN set to : ", newusername)
                   Alert.alert(
                     "Notification",
-                    ("Your new username is :"+newusername),
+                    ("Your new username is :"+_newUsername),
                 [{ text: "OK",}]
                 );
                 navigation.goBack();
@@ -47,9 +48,6 @@ const EditUsername = ({route, navigation}) => {
     const bool_isDarkMode = () => {
         return scheme === "dark";
     }
-    const bgColor = () => {
-        return bool_isDarkMode() ? "#000000":"#FFFFFF";
-    }
     const textColor = () => {
         return bool_isDarkMode() ? "#FFFFFF":"#000000";
     }
@@ -61,10 +59,10 @@ const EditUsername = ({route, navigation}) => {
     }
 
     return (
-        <SafeAreaView style={{flex:1,backgroundColor:bgColor()}}>
+        <View style={{flex:1,paddingTop:15}}>
             <View>
                 <Text style={{fontSize:17,fontWeight:"600",letterSpacing:0.5,color:textColor(),marginLeft:15,marginBottom:10}}>New Username</Text>
-                {redoInfo_username && <View style={{backgroundColor:"#FA8283",borderWidth:1,borderColor:"#FDD7D8",borderRadius:5,padding:5,width:320,marginLeft:5,marginRight:15,marginBottom:10}}>
+                {redoInfo_username && <View style={{backgroundColor:"rgba(0,0,0,0.5)",borderWidth:1,borderColor:"#FDD7D8",borderRadius:10,padding:5,width:screenWidth-40,alignSelf:"center",marginBottom:10}}>
                     <Text style={{color:"#ffffff",fontSize:15,fontWeight:"700"}}>{msg_username_error}</Text>
                 </View>}
                 <TextInput style={[styles.input,{backgroundColor:containerColor(),borderColor:containerRadiusColor()}]} color={textColor()} label="Newusername" value={newusername} onChangeText={setnewusername} maxLength = {20}/>
@@ -72,7 +70,7 @@ const EditUsername = ({route, navigation}) => {
                     <Text style={{fontSize:17,color:"white",fontWeight:"bold"}}>Confirm</Text>
                 </TouchableOpacity>
             </View>
-        </SafeAreaView>
+        </View>
     )
 }
 
@@ -82,7 +80,7 @@ const styles = StyleSheet.create({
     input: {
         alignSelf:"center",
         height: 35,
-        width: Dimensions.get("window").width-40,
+        width: screenWidth-40,
         paddingLeft: 10,
         borderWidth: 1,
         borderRadius: 10,

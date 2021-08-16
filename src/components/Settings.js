@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { View, Text, Image, ScrollView, Alert, StyleSheet, TouchableOpacity, Switch, Dimensions, Platform } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { db, auth } from '../../firebase';
 import { useColorScheme } from "react-native-appearance";
 import { AdMobBanner} from 'expo-ads-admob';
 import { useNavigation } from '@react-navigation/core';
 import * as Linking from 'expo-linking';
+import Env from '../env.json';
 
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get("window").height;
@@ -24,9 +24,6 @@ const Settings = ({userEmail,username,requirePIN,ispro,bannerID,boughtPro}) => {
     const bool_isDarkMode = () => {
         return scheme === "dark";
     }
-    const bgColor = () => {
-        return bool_isDarkMode() ? "#000000":"#FFFFFF";
-    }
     const textColor = () => {
         return bool_isDarkMode() ? "#FFFFFF":"#000000";
     }
@@ -35,9 +32,9 @@ const Settings = ({userEmail,username,requirePIN,ispro,bannerID,boughtPro}) => {
     }
     const dynamicMargin = () => {
         if(ispro){
-            return (Platform.OS === "ios") ? 231:160;
+            return (Platform.OS === "ios") ? 203:156;
         }else{
-            return (Platform.OS === "ios") ? 291:220;
+            return (Platform.OS === "ios") ? 263:216;
         }
     }
 
@@ -93,7 +90,11 @@ const Settings = ({userEmail,username,requirePIN,ispro,bannerID,boughtPro}) => {
     const inAppReview = () => {
         if(Platform.OS === "ios"){
             Linking.openURL(
-                `itms-apps://itunes.apple.com/app/viewContentsUserReviews/id${1579682178}?action=write-review`
+                `itms-apps://itunes.apple.com/app/viewContentsUserReviews/id${Env.itunesItemId}?action=write-review`
+              );
+        }else{
+            Linking.openURL(
+                `market://details?id=${Env.androidPackageName}&showAllReviews=true`
               );
         }
     }
@@ -102,7 +103,21 @@ const Settings = ({userEmail,username,requirePIN,ispro,bannerID,boughtPro}) => {
     }
     const followTwitter = () => {
         Linking.openURL(`https://twitter.com/AndyLee_dev`);
-
+    }
+    const viewGit = () => {
+        Linking.openURL(`https://github.com/AndyLeezard/CoinTracer_public`);
+    }
+    const tryResetPW = () => {
+        Alert.alert(
+            "Reset password","Your request will be sent to your email address",
+        [
+            { text: "Confirm", onPress: () =>  requestResetPasword() },
+            { text: "Cancel", style: "cancel"}
+        ]
+        );
+    }
+    const adError = (e) => {
+        console.log("Error showing banner ad ! : ",e);
     }
 
     const Account = () => { 
@@ -176,7 +191,7 @@ const Settings = ({userEmail,username,requirePIN,ispro,bannerID,boughtPro}) => {
                         )}
                     </View>
                     <View>
-                        <TouchableOpacity onPress={()=>{requestResetPasword()}}>
+                        <TouchableOpacity onPress={tryResetPW}>
                             <View style={{flexDirection:"row",justifyContent:"space-between",alignItems:"center",marginBottom:25}}>
                                 <Text style={{fontSize:17,fontWeight:"300",letterSpacing:0.5,color:textColor()}}>Reset Password</Text>
                             </View>
@@ -194,7 +209,7 @@ const Settings = ({userEmail,username,requirePIN,ispro,bannerID,boughtPro}) => {
                 <View style={{marginTop:30,flexDirection:"column"}}>
                     <TouchableOpacity onPress={()=>navigation.navigate("Stack_Settings_SC")}>
                         <View style={{flexDirection:"row",alignItems:"center",justifyContent:"space-between",marginBottom:30}}>
-                            <Text style={{flexWrap:"wrap",fontSize:17,fontWeight:"300",letterSpacing:0.5,color:textColor()}}>Support & Contact</Text>
+                            <Text style={{flexWrap:"wrap",fontSize:17,fontWeight:"300",letterSpacing:0.5,color:textColor()}}>About</Text>
                             <Image
                                 source={require("../assets/icons/1x/arrow_darkmode.png")}
                                 style={[{width:10,height:10},(!bool_isDarkMode()&&{tintColor:"#000000"})]}
@@ -202,7 +217,7 @@ const Settings = ({userEmail,username,requirePIN,ispro,bannerID,boughtPro}) => {
                         </View>
                     </TouchableOpacity>
                 </View>
-                {(Platform.OS==='ios') && <TouchableOpacity onPress={inAppReview}>
+                <TouchableOpacity onPress={inAppReview}>
                     <View style={{flexDirection:"row",justifyContent:"space-between",alignItems:"center",marginBottom:25}}>
                         <Text style={{fontSize:17,fontWeight:"300",letterSpacing:0.5,color:textColor()}}>Rate CoinTracer</Text>
                         {(Platform.OS==='ios') ? (<Image
@@ -214,7 +229,7 @@ const Settings = ({userEmail,username,requirePIN,ispro,bannerID,boughtPro}) => {
                             style={{width:25,height:25}}
                         />)}
                     </View>
-                </TouchableOpacity>}
+                </TouchableOpacity>
                 <TouchableOpacity onPress={joinDiscord}>
                     <View style={{flexDirection:"row",justifyContent:"space-between",alignItems:"center",marginBottom:25}}>
                         <Text style={{fontSize:17,fontWeight:"300",letterSpacing:0.5,color:textColor()}}>Join my Discord server</Text>
@@ -233,6 +248,15 @@ const Settings = ({userEmail,username,requirePIN,ispro,bannerID,boughtPro}) => {
                         />
                     </View>
                 </TouchableOpacity>
+                <TouchableOpacity onPress={viewGit}>
+                    <View style={{flexDirection:"row",justifyContent:"space-between",alignItems:"center",marginBottom:25}}>
+                        <Text style={{fontSize:17,fontWeight:"300",letterSpacing:0.5,color:textColor()}}>View my GitHub Repo</Text>
+                        <Image
+                            source={require("../assets/icons/1x/github.png")}
+                            style={{width:25,height:25}}
+                        />
+                    </View>
+                </TouchableOpacity>
                 <TouchableOpacity style={styles.appButtonContainer} onPress={firebaseSignOut}>
                     <Text style={styles.appButtonText}>Sign Out</Text>
                 </TouchableOpacity>
@@ -241,11 +265,11 @@ const Settings = ({userEmail,username,requirePIN,ispro,bannerID,boughtPro}) => {
     }
 
     return (
-    <SafeAreaView style={{flex:1, backgroundColor:bgColor(),marginTop:-10}}>
+    <View style={{flex:1,marginTop:10}}>
             <View style={{height:screenHeight-dynamicMargin(),marginBottom:1}}>
                 <ScrollView style={{paddingHorizontal: 20}}>
-                    <Text style={{fontSize:14,fontWeight:"500",color:textColor()}}>{userEmail}</Text>
                     <Text style={{fontSize:29,fontWeight:"bold",marginTop:5,color:textColor()}}>Hello, {username}!</Text>
+                    <Text style={{fontSize:14,fontWeight:"500",color:textColor()}}>{userEmail}</Text>
                     <Account/>
                     <Security/>
                     <SNC/>
@@ -257,12 +281,12 @@ const Settings = ({userEmail,username,requirePIN,ispro,bannerID,boughtPro}) => {
                     bannerSize="fullBanner"
                     adUnitID={bannerID} // Test ID, Replace with your-admob-unit-id
                     servePersonalizedAds // true or false
-                    //onDidFailToReceiveAdWithError={this.bannerError}
+                    onDidFailToReceiveAdWithError={adError}
                     />
                 }
             </View>
-            <View style={{width:screenWidth,height:100,backgroundColor:"red"}}/>
-    </SafeAreaView>
+            {/*<View style={{width:screenWidth,height:100,backgroundColor:"red"}}/>*/}
+    </View>
     )
 }
 

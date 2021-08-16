@@ -5,12 +5,11 @@ import Env from '../env.json';
 
 const SC = () => {
     const { colors } = useTheme();
-    const env = Env.currentVersion;
 
     return (
     <View>
         <Text style={{fontSize: 19,fontWeight: "700",marginBottom:10,color:colors.text}}>Version & Future updates</Text>
-        <Text style={{fontSize: 16,fontWeight: "500",marginBottom:5,color:colors.text}}>Version {env} (August 8 2021)</Text>
+        <Text style={{fontSize: 16,fontWeight: "500",marginBottom:5,color:colors.text}}>Version {Env.currentVersion} ({Env.lastUpdated})</Text>
         <Text style={{fontSize: 16,fontWeight: "500",marginBottom:5,color:colors.text}}>Potential new features in development :</Text>
         <Text style={{fontSize: 16,fontWeight: "500",marginBottom:5,color:colors.text}}> - Futures & Margin trading</Text>
         <Text style={{fontSize: 16,fontWeight: "500",marginBottom:5,color:colors.text}}> - Orders (stop & limit)</Text>

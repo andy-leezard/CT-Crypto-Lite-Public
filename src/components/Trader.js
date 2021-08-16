@@ -1,5 +1,5 @@
-import React, {useEffect,useState} from 'react'
-import { View, Text, Image, StyleSheet, TouchableOpacity, Dimensions, TextInput, Alert, Platform } from 'react-native'
+import React, {useRef,useEffect,useState} from 'react'
+import { View, Text, Image, StyleSheet, TouchableOpacity, Dimensions, TextInput, Alert } from 'react-native'
 import { db } from '../../firebase';
 import { Button } from 'react-native-elements';
 import Slider from "@brlja/react-native-slider";
@@ -27,11 +27,12 @@ const Trader = ({coinname,user,coinprice,coinsymbol,coinIcon,upgraded}) => {
     const [actionQuantity_str,setActionQuantity_str] = useState("");
     const [limit, setLimit] = useState(0);
     const [commission_percentage, setCommission_Percentage] = useState(1);
+    const inputRef =  useRef();
 
     const ref = db.collection('users').doc(user);
 
     const stableCoinAlert = () =>{
-        const message = coinname + ` is a stable coin.\nIts price won't change.`;
+        const message = coinname + ` is a stable coin.\nIts price won't change much.`;
         Alert.alert(
             "Information",
             message,
@@ -60,7 +61,7 @@ const Trader = ({coinname,user,coinprice,coinsymbol,coinIcon,upgraded}) => {
                         console.log("Document data:", doc.data().quantity);
                     }else{
                         stablecoins.some(item => item.name === coinname) && stableCoinAlert();
-                        ref.collection("wallet").doc(coinname).set({quantity: 0})
+                        ref.collection("wallet").doc(coinname).set({quantity: 0,symbol: coinsymbol})
                             .then(()=>{console.log("successfully created a new wallet ref :", coinname)})
                         // doc.data() will be undefined in this case
                     }
@@ -77,14 +78,16 @@ const Trader = ({coinname,user,coinprice,coinsymbol,coinIcon,upgraded}) => {
         let _1 = await StoreReview.isAvailableAsync();
         let _2 = await StoreReview.hasAction();
         let _3 = await StoreReview.storeUrl() ?? "";
+        let _4 = Math.random();
+        let proba = 0.25; // probability that it will ask to review app.
         console.log("can this device review ??",_1);
         console.log("has action ?? ",_2);
         console.log("What is the store url ?? ",_3);
-        if(_1 && _2 && _3 !==""){
+        if(_1 && _2 && _3 !=="" && _4 < proba){
             console.log("requesting review");
             await StoreReview.requestReview();
         }else{
-            console.log("cannot demand review");
+            (_4<proba) ? console.log("cannot demand review") : console.log("not requesting review this time.");
         }
     }
 
@@ -129,10 +132,10 @@ const Trader = ({coinname,user,coinprice,coinsymbol,coinIcon,upgraded}) => {
 
     const regardingCommissionFees = () => {
         upgraded ? Alert.alert(
-            "Information","Commission fees are already fully reduced for your upgraded account.",
+            "Information","The commission reduction is already applied.",
         [{ text: "Cool"}]
         ):Alert.alert(
-            "Notification","Commission fees can be reduced by upgrading your account. Please check out 'Settings' tab for further information.",
+            "Notification","The commission rate can be reduced by upgrading your account. Please check out 'Settings' tab for further information.",
         [{ text: "OK"}]
         )
     }
@@ -164,36 +167,45 @@ const Trader = ({coinname,user,coinprice,coinsymbol,coinIcon,upgraded}) => {
         }
     }
 
+    const amount_decimalHandler = (i) => {//typeof i = "str"
+        let cut = i.substring(0,i.length-1)
+        let replaced = cut.replaceAt(cut.length-1,i[i.length-1]);
+        let asNum = Number(replaced);
+        setActionQuantity_str(replaced);
+        trigger_handleAmount(asNum);
+    }
+
     const amountHandler = (i) => {
         if(unitmode==="Fiat"){
             if(lengthOfDecimal(i)>2){
+                if(lengthOfDecimal(i)>3){
+                    amount_decimalHandler(dynamicRound(i,3).toString());
+                    return;
+                }
                 if(i[i.length-1]==="0"){
                     return;
                 }else{
-                    let cut = i.substring(0,i.length-1)
-                    let replaced = cut.replaceAt(cut.length-1,i[i.length-1]);
-                    let asNum = Number(replaced*10);
-                    setActionQuantity_str(replaced);
-                    trigger_handleAmount(asNum);
+                    amount_decimalHandler(i);
                     return;
                 }
             }
         }else{
             if(lengthOfDecimal(i)>8){
+                if(lengthOfDecimal(i)>9){
+                    amount_decimalHandler(dynamicRound(i,9).toString());
+                    return;
+                }
                 if(i[i.length-1]==="0"){
                     return;
                 }else{
-                    let cut = i.substring(0,i.length-1)
-                    let replaced = cut.replaceAt(cut.length-1,i[i.length-1]);
-                    let asNum = Number(replaced*10);
-                    setActionQuantity_str(replaced);
-                    trigger_handleAmount(asNum);
+                    amount_decimalHandler(i);
                     return;
                 }
             }
         }
         if(i===""){
             setActionQuantity_str("");
+            setActionQuantity(0);setActionQuantity_crypto(0);setActionQuantity_fiat(0);setPercentage(0);
             return;
         }
         if(i==="." || i===","){
@@ -219,13 +231,17 @@ const Trader = ({coinname,user,coinprice,coinsymbol,coinIcon,upgraded}) => {
                 setPercentage(0);
                 return;
             }
-            setActionQuantity_str(i);
+            if(char_count(i,".")<1){
+                setActionQuantity_str(param.toString());
+            }else{
+                setActionQuantity_str(i);
+            }
             if(param>limit){
                 console.log("Warning - action quantity (", param , ") surpassed the limit :",limit);
                 setActionQuantity(limit);slideHandler_justCrypto(1);slideHandler_justFiat(1);
                 setPercentage(1);setActionQuantity_str(limit.toString());
             }else{
-                console.log("Action quantity (", param , ") does not surpass the limit :",limit);
+                console.log("OK - Action quantity (", param , ") does not surpass the limit :",limit);
                 trigger_handleAmount(param);
             }
         }else{
@@ -345,7 +361,7 @@ const Trader = ({coinname,user,coinprice,coinsymbol,coinIcon,upgraded}) => {
             if(actionQuantity>0){
                 triggerTrade();return;
             }else{
-                return;
+                alert_noAmount();return;
             }
         }
         if(i==="Buy"){bool_isDarkMode() ? setActionColor("#42B95D"):setActionColor("#36eb5f");}//Previously #35934A
@@ -396,6 +412,18 @@ const Trader = ({coinname,user,coinprice,coinsymbol,coinIcon,upgraded}) => {
                 setActionQuantity_crypto(temp);
             }
         }
+    }
+
+    const alert_noAmount = () => {
+        const message = `Please type your ${(action === "Buy") ? ("buying"):("selling")} quantity`;
+        Alert.alert(
+            "Information",
+            message,
+            [
+              {text: "OK"}
+            ]
+        );
+        inputRef.current.focus();
     }
 
     const determineDecimals = (i) => {
@@ -600,8 +628,9 @@ const Trader = ({coinname,user,coinprice,coinsymbol,coinIcon,upgraded}) => {
         <View style={{alignItems:"center",marginTop:10}}>
             <View style={{flexDirection:"row",justifyContent:"space-between",borderWidth:2,borderRadius:10,borderColor:containerRadiusColor(),backgroundColor:containerColor(), width:width, height:50,padding:5,marginBottom:10}}>
                 <View style={{flexDirection:"row", width:((width/2)-15), alignItems:"center"}}>
-                    <Image source={{uri:coinIcon}} style={{width:40,height:40}}/>
-                    <Text style={{fontSize:15,fontWeight:"bold",color:textColor(),marginLeft:5}}>My {coinsymbol} wallet</Text>
+                    <View style={{position:"absolute",width:38,height:38,borderRadius:8,backgroundColor:"white"}} />
+                    <Image source={{uri:coinIcon}} style={{width:32,height:32,marginLeft:3}}/>
+                    <Text style={{fontSize:15,fontWeight:"bold",color:textColor(),marginLeft:10}}>My {coinsymbol} wallet</Text>
                 </View>
                 <View style={{flexDirection:"column", width:((width/2)-15)}}>
                     <Text style={{fontSize:15,fontWeight:"bold",color:textColor(),marginRight:5,textAlign:"right"}}>${numberWithCommas(dynamicRound(quantity*coinprice,2))}</Text>
@@ -610,8 +639,9 @@ const Trader = ({coinname,user,coinprice,coinsymbol,coinIcon,upgraded}) => {
             </View>
             <View style={{flexDirection:"row",justifyContent:"space-between",borderWidth:2,borderRadius:10,borderColor:containerRadiusColor(),backgroundColor:containerColor(), width:width, height:50,padding:5,marginBottom:6}}>
                 <View style={{flexDirection:"row", width:((width/2)-15), alignItems:"center"}}>
-                    <Image source={require('../assets/icons/1x/usd_custom.png')} style={{width:35,height:35}}/>
-                    <Text style={{fontSize:15,fontWeight:"bold",color:textColor(),marginHorizontal:10}}>My virtual USD wallet</Text>
+                    <View style={{position:"absolute",width:38,height:38,borderRadius:8,backgroundColor:"white"}} />
+                    <Image source={require('../assets/icons/1x/usd_custom.png')} style={{width:32,height:32,marginLeft:3}}/>
+                    <Text style={{fontSize:15,fontWeight:"bold",color:textColor(),marginLeft:10}}>My virtual USD wallet</Text>
                 </View>
                 <View style={{flexDirection:"column", width:((width/2)-15)}}>
                     <Text style={{fontSize:15,fontWeight:"bold",color:textColor(),marginRight:5,textAlign:"right"}}>${numberWithCommas(seed)}</Text>
@@ -650,6 +680,7 @@ const Trader = ({coinname,user,coinprice,coinsymbol,coinIcon,upgraded}) => {
             </View>
             <View style={{width:width,justifyContent:"center",alignItems:"center",height:35,marginTop:5,marginBottom:5}}>
                 <TextInput
+                    ref={inputRef}
                     style={{paddingHorizontal: 10,backgroundColor: containerColor_secondary(),color:actionColor,width:width,height:35,borderRadius: 5,fontSize:18,fontWeight:"bold",textAlign:"center"}}
                     //color="#ffffff"
                     label="actionQuantity"

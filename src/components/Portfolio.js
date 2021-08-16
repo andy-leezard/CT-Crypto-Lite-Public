@@ -1,20 +1,20 @@
 import React, {useEffect, useState} from 'react';
 import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity, Dimensions, Platform, Alert } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { AdMobBanner} from 'expo-ads-admob';
 import { PieChart } from "react-native-chart-kit";
 import _ from 'lodash';
 import { useColorScheme } from "react-native-appearance";
 import Env from '../env.json';
 import { useNavigation } from '@react-navigation/core';
+import { db } from '../../firebase';
 
-const width = Dimensions.get("window").width-20;
+const screenWidth = Dimensions.get("window").width;
+const width = screenWidth-20;
 const screenHeight = Dimensions.get("window").height;
-const uri_fiatcoin = "https://uri_fiat";
 
 const initialLimit = 15;
 
-const Portfolio = ({username, userEmail, portfolio, ispro, bannerID, upgraded}) => {
+const Portfolio = ({userEmail, portfolio, ispro, bannerID, upgraded, isTablet}) => {
     const navigation = useNavigation();
     const scheme = useColorScheme();
     const [viewStatus,setViewStatus] = useState(0);
@@ -55,9 +55,9 @@ const Portfolio = ({username, userEmail, portfolio, ispro, bannerID, upgraded}) 
     }
     const dynamicMargin = () => {
         if(ispro){
-            return (Platform.OS === 'ios') ? 465:412;
+            return (Platform.OS === 'ios') ? 448:401;
         }else{
-            return (Platform.OS === 'ios') ? 525:472;
+            return (Platform.OS === 'ios') ? 508:461;
         }
     }
     const avoidDuplicate = (d) => Object.values(d).reduce((r, i) => !~r.indexOf(i) ? (r.push(i), r) : r , []);
@@ -69,10 +69,30 @@ const Portfolio = ({username, userEmail, portfolio, ispro, bannerID, upgraded}) 
         return l.join(' ');
     }
 
-    const updatePNL = () => {
-        let dateobj = ("Since "+simplifyDate(new Date().toDateString()));
-        const directory = db.collection('users').doc(userEmail);
-        directory.update({totalbuyin: portfolio.totalAppreciation,pnldate: dateobj});
+    const tryDeleteDelisted = (i,s) => {
+        Alert.alert(
+            "Delisted crypto",
+            `${i} (${s}) has been delisted from the market due to its poor market performance.\nWould you like to delete your ${s} wallet?\nThis can't be undone. Please note that a delisted crypto still has a chance to be relisted later on.`,
+        [
+            { text: "Confirm", onPress: () =>  deleteDelisted(i) },
+            { text: "Cancel", style: "cancel"}
+        ]
+        );
+    }
+
+    const deleteDelisted = (i) => {
+        db.collection('users').doc(userEmail).collection('wallet').doc(i).delete().then(()=>{
+            Alert.alert(
+                "Notification",
+                `Your ${i} wallet has been deleted following your request.`,
+            [{ text: "OK"},]);
+            console.log(i," wallet has been deleted at : "+new Date().toLocaleString());
+        }).catch((e)=>{
+            Alert.alert(
+                "Error",
+                e,
+            [{ text: "OK"},]);
+        })
     }
 
     const triggerUpdatePNL = () =>{
@@ -83,6 +103,11 @@ const Portfolio = ({username, userEmail, portfolio, ispro, bannerID, upgraded}) 
             { text: "Cancel", style: "cancel"}
         ]
         );
+    }
+    const updatePNL = () => {
+        let dateobj = ("Since "+simplifyDate(new Date().toDateString()));
+        const directory = db.collection('users').doc(userEmail);
+        directory.update({totalbuyin: portfolio.totalAppreciation,pnldate: dateobj});
     }
 
     function numberWithCommas(i) {
@@ -138,34 +163,40 @@ const Portfolio = ({username, userEmail, portfolio, ispro, bannerID, upgraded}) 
         let delta = Math.abs(maxLimit - limit);
         (delta>=10) ? setlimit(limit + 10):setlimit(maxLimit);
     }
+    const openHistory = () => {
+        navigation.navigate('Stack_History',{email:userEmail,ispro:ispro,bannerID:bannerID,isTablet:isTablet})
+    }
+    const adError = (e) => {
+        console.log("Error showing banner ad ! : ",e);
+    }
 
 
     return (
-        <SafeAreaView style={{flex:1, backgroundColor:bgColor()}}>
+        <View style={{flex:1, backgroundColor:bgColor()}}>
             <View>
-            <View style={{alignSelf:"center",marginTop:15}}>
-            <View style={{flexDirection:"row",justifyContent:"space-between",}}>
-                <Text style={{color:textColor(),fontSize:20,fontWeight:"bold",marginBottom:10,marginTop:0}}>{username}'s portfolio</Text>
-                <TouchableOpacity onPress={()=>toggleViewStatus()}>
-                {(viewStatus===0) && <View style={{width:30,height:25,borderRadius:5,backgroundColor:"#CBCBCB",justifyContent:"center",alignItems:"center"}}><Image source={require("../assets/icons/1x/view.png")} style={{width:20,height:20,tintColor:"#40B2AB"}}/></View>}
-                {(viewStatus===1) && <View style={{width:30,height:25,borderRadius:5,backgroundColor:"#CBCBCB",justifyContent:"center",alignItems:"center"}}><Image source={require("../assets/icons/1x/hide.png")} style={{width:20,height:20,tintColor:"#2D7E71"}}/></View>}
-                {(viewStatus===2) && <View style={{width:30,height:25,borderRadius:5,backgroundColor:"#CBCBCB",justifyContent:"center",alignItems:"center"}}><Image source={require("../assets/icons/1x/hide.png")} style={{width:20,height:20,tintColor:"#D65F3E"}}/></View>}
-                </TouchableOpacity>
-            </View>
+            <View style={{marginTop:10}}>
                 <View style={{width:width, borderRadius:10, borderWidth:3, borderColor:containerRadiusColor(), backgroundColor:containerColor(), padding:10,marginBottom:10,alignSelf:"center"}}>
-                    <View style={{alignSelf:"center"}}>
-                        <Text style={{color:textColor(),fontSize:16,fontWeight:"600",marginBottom:10,fontWeight:"bold"}}>Total value : ${conditionalRender(portfolio.totalAppreciation,0,6)} (fiat:{conditionalRender((dynamicRound((portfolio.seed/portfolio.totalAppreciation)*100,2)),1,2)}%)</Text>
-                        {(portfolio.piedata != undefined) && (<PieChart
-                            width={width-40}
+                    <TouchableOpacity style={{alignSelf:"center"}} onPress={()=>toggleViewStatus()}>
+                        <Text style={{position:"absolute",alignSelf:"flex-start",color:textColor(),fontSize:16,fontWeight:"600",marginBottom:10,fontWeight:"bold",marginLeft:10}}>Total value : ${conditionalRender(portfolio.totalAppreciation,0,6)} (fiat:{conditionalRender((dynamicRound((portfolio.seed/portfolio.totalAppreciation)*100,2)),1,2)}%)</Text>
+                        <View style={{position:"absolute",alignSelf:"flex-end"}} >
+                            {(viewStatus===0) && <View style={{width:30,height:25,borderRadius:5,backgroundColor:"#CBCBCB",justifyContent:"center",alignItems:"center"}}><Image source={require("../assets/icons/1x/view.png")} style={{width:20,height:20,tintColor:"#40B2AB"}}/></View>}
+                            {(viewStatus===1) && <View style={{width:30,height:25,borderRadius:5,backgroundColor:"#CBCBCB",justifyContent:"center",alignItems:"center"}}><Image source={require("../assets/icons/1x/hide.png")} style={{width:20,height:20,tintColor:"#2D7E71"}}/></View>}
+                            {(viewStatus===2) && <View style={{width:30,height:25,borderRadius:5,backgroundColor:"#CBCBCB",justifyContent:"center",alignItems:"center"}}><Image source={require("../assets/icons/1x/hide.png")} style={{width:20,height:20,tintColor:"#D65F3E"}}/></View>}
+                        </View>
+                        {(portfolio.piedata != undefined) && (
+                        <View style={{marginTop:8}}>
+                        <PieChart
+                            width={width-20}
                             height={200}
                             data={portfolio.piedata}
                             accessor="appreciation"
                             backgroundColor="transparent"
-                            paddingLeft="15"
+                            paddingLeft="40"
                             chartConfig={chartConfig}
-                            />
+                        />
+                        </View>
                         )}
-                    </View>
+                    </TouchableOpacity>
                 </View>
                 {/*onPress={ toggle history }*/}
                 <View style={{height:screenHeight-dynamicMargin(),width:width,marginTop:1,marginBottom:1,alignSelf:"center",backgroundColor:containerColor(),borderRadius:10}}>
@@ -177,13 +208,13 @@ const Portfolio = ({username, userEmail, portfolio, ispro, bannerID, upgraded}) 
                         }}}
                     >
                         <View style={{alignItems:"center"}}>
-                        <TouchableOpacity onPress={()=>navigation.navigate('Stack_History',{email:userEmail,ispro:ispro,bannerID:bannerID})}>
+                        <TouchableOpacity onPress={openHistory}>
                         <View style={{flexDirection:"row",justifyContent:"space-between",borderWidth:2,borderRadius:10,borderColor:containerRadiusColor(),backgroundColor:containerColor(), width:width-20, height:50,padding:5,marginTop:10}}>
                                 <View style={{flexDirection:"row", width:((width/2)-15), alignItems:"center"}}>
                                     <Image source={require("../assets/icons/1x/Analytic.png")} style={{width:32,height:32,tintColor:"#40AAF2",marginLeft:3}}/>
                                     <View style={{flexDirection:"column"}}>
-                                        <Text style={{fontSize:15,fontWeight:"bold",color:textColor(),marginLeft:9}}>My PNL</Text>
-                                        <Text style={{fontSize:15,fontWeight:"bold",color:textColor(),marginLeft:9}}>(All-time)</Text>
+                                        <Text style={{fontSize:15,fontWeight:"bold",color:textColor(),marginLeft:11}}>My PNL</Text>
+                                        <Text style={{fontSize:15,fontWeight:"bold",color:textColor(),marginLeft:11}}>(All-time)</Text>
                                     </View>
                                 </View>
                                 <View style={{flexDirection:"column", width:((width/2)-15)}}>
@@ -205,8 +236,8 @@ const Portfolio = ({username, userEmail, portfolio, ispro, bannerID, upgraded}) 
                                 <View style={{flexDirection:"row", width:((width/2)-15), alignItems:"center"}}>
                                     <Image source={require("../assets/icons/1x/Analytic.png")} style={{width:32,height:32,tintColor:"#40AAF2",marginLeft:3}}/>
                                     <View style={{flexDirection:"column"}}>
-                                        <Text style={{fontSize:15,fontWeight:"bold",color:textColor(),marginLeft:9}}>My PNL</Text>
-                                        <Text style={{fontSize:15,fontWeight:"bold",color:textColor(),marginLeft:9}}>({portfolio.pnldate})</Text>
+                                        <Text style={{fontSize:15,fontWeight:"bold",color:textColor(),marginLeft:11}}>My PNL</Text>
+                                        <Text style={{fontSize:15,fontWeight:"bold",color:textColor(),marginLeft:11}}>({portfolio.pnldate})</Text>
                                     </View>
                                     
                                 </View>
@@ -224,12 +255,12 @@ const Portfolio = ({username, userEmail, portfolio, ispro, bannerID, upgraded}) 
                                 </View>
                             </View>
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={()=>navigation.navigate('Stack_History',{email:userEmail,ispro:ispro,bannerID:bannerID})}>
+                        <TouchableOpacity onPress={openHistory}>
                             <View style={{flexDirection:"row",justifyContent:"space-between",borderWidth:2,borderRadius:10,borderColor:containerRadiusColor(),backgroundColor:containerColor(), width:width-20, height:50,padding:5,marginTop:10}}>
                                     <View style={{flexDirection:"row", width:((width/2)-15), alignItems:"center"}}>
                                         <View style={{position:"absolute",width:38,height:38,borderRadius:8,backgroundColor:"white"}} />
-                                        <Image source={{uri:uri_fiatcoin}} style={{width:32,height:32,marginLeft:3}}/>
-                                        <Text style={{fontSize:15,fontWeight:"bold",color:textColor(),marginLeft:9}}>My virtual USD wallet</Text>
+                                        <Image source={require('../assets/icons/1x/usd_custom.png')} style={{width:32,height:32,marginLeft:3}}/>
+                                        <Text style={{fontSize:15,fontWeight:"bold",color:textColor(),marginLeft:11}}>My virtual USD wallet</Text>
                                     </View>
                                     <View style={{flexDirection:"column", width:((width/2)-15)}}>
                                         <Text style={{fontSize:15,fontWeight:"bold",color:textColor(),marginRight:5,textAlign:"right"}}>${conditionalRender(numberWithCommas(dynamicRound(portfolio.seed,2)),0,6)}</Text>
@@ -240,12 +271,18 @@ const Portfolio = ({username, userEmail, portfolio, ispro, bannerID, upgraded}) 
                         {walletdata.map((i, index)=>{
                             if(i.id != "VUSD"){
                             return(
-                                <TouchableOpacity key={index} onPress={()=>navigation.navigate('Stack_Portfolio_Trading',{email:userEmail,imgurl:i.img,sparkline:i.spark,tradingCoin:i.name,coinprice:i.crntPrice,coinsymbol:i.id,upgraded:upgraded,bannerID:bannerID,ispro:ispro})}>
+                                <TouchableOpacity key={index} onPress={()=>navigation.navigate('Stack_Portfolio_Trading',{email:userEmail,imgurl:i.img,rank:i.rank,sparkline:i.spark,tradingCoin:i.name,coinprice:i.crntPrice,coinsymbol:i.id,upgraded:upgraded,bannerID:bannerID,ispro:ispro})}>
                                     <View style={{flexDirection:"row",justifyContent:"space-between",borderWidth:2,borderRadius:10,borderColor:containerRadiusColor(),backgroundColor:containerColor(), width:width-20, height:50,padding:5,marginTop:10}}>
                                         <View style={{flexDirection:"row", width:((width/2)-15), alignItems:"center"}}>
                                             <View style={{position:"absolute",width:38,height:38,borderRadius:8,backgroundColor:"white"}} />
                                             <Image source={{uri:i.img}} style={{width:32,height:32,marginLeft:3}}/>
-                                            <Text style={{fontSize:15,fontWeight:"bold",color:textColor(),marginLeft:9}}>My {i.id} wallet</Text>
+                                            <Text style={{fontSize:15,fontWeight:"bold",color:textColor(),marginLeft:11}}>My {i.id} wallet</Text>
+                                            {/* // for when individual wallet PNL is available with average purchasing price.
+                                            <View style={{flexDirection:"row",justifyContent:"space-between",marginLeft:11}}>
+                                                <Text style={{fontSize:16,fontWeight:"bold",color:textColor()}}>{i.id} wallet</Text>
+                                                <Text style={{fontSize:14,fontWeight:"bold",color:subTextColor()}}>{conditionalRender(numberWithCommas(autoRound(i.quantity)),0,6)} {i.id}</Text>
+                                            </View>
+                                            */}
                                         </View>
                                         <View style={{flexDirection:"column", width:((width/2)-15)}}>
                                             <Text style={{fontSize:15,fontWeight:"bold",color:textColor(),marginRight:5,textAlign:"right"}}>${conditionalRender(numberWithCommas(dynamicRound(i.quantity*i.crntPrice,2)),0,6)}</Text>
@@ -254,6 +291,29 @@ const Portfolio = ({username, userEmail, portfolio, ispro, bannerID, upgraded}) 
                                     </View>
                                 </TouchableOpacity>
                             )}
+                        })}
+                        {portfolio.delisted.map((i)=>{
+                            return(
+                                <TouchableOpacity key={i.name} onPress={()=>tryDeleteDelisted(i.name,i.symbol)}>
+                                    <View style={{flexDirection:"row",justifyContent:"space-between",borderWidth:2,borderRadius:10,borderColor:containerRadiusColor(),backgroundColor:containerColor(), width:width-20, height:50,padding:5,marginTop:10}}>
+                                        <View style={{flexDirection:"row", width:((width/2)-15), alignItems:"center"}}>
+                                            <View style={{position:"absolute",width:38,height:38,borderRadius:8,backgroundColor:"white"}} />
+                                            <Image source={{uri:i.img}} style={{width:32,height:32,marginLeft:3}}/>
+                                            {(i.symbol.length<13) ? (<View style={{flexDirection:"column",justifyContent:"space-between"}}>
+                                                <Text style={{fontSize:15,fontWeight:"bold",color:textColor(),marginLeft:11}}>My {i.symbol} wallet</Text>
+                                                <Text style={{fontSize:14,fontWeight:"bold",color:textColor(),marginLeft:11}}>(delisted)</Text>
+                                            </View>):(<View style={{flexDirection:"column",justifyContent:"space-between"}}>
+                                                <Text style={{fontSize:15,fontWeight:"bold",color:textColor(),marginLeft:11}}>My {i.symbol} wallet (delisted)</Text>
+                                            </View>
+                                            )}
+                                        </View>
+                                        <View style={{flexDirection:"column", width:((width/2)-15)}}>
+                                            <Text style={{fontSize:15,fontWeight:"bold",color:textColor(),marginRight:5,textAlign:"right"}}>$ 0</Text>
+                                            <Text style={[bool_isDarkMode()? styles.changetext_neutral_dark:styles.changetext_neutral_light,{fontSize:15,fontWeight:"bold",marginRight:5,textAlign:"right"}]}>{conditionalRender(numberWithCommas(autoRound(i.quantity)),0,6)} {i.symbol}</Text>
+                                        </View>
+                                    </View>
+                                </TouchableOpacity>
+                            )
                         })}
                         <View style={{height:10}}/>
                         </View>
@@ -266,12 +326,13 @@ const Portfolio = ({username, userEmail, portfolio, ispro, bannerID, upgraded}) 
                     bannerSize="fullBanner"
                     adUnitID={bannerID} // Test ID, Replace with your-admob-unit-id
                     servePersonalizedAds // true or false
-                    //onDidFailToReceiveAdWithError={this.bannerError}
+                    onDidFailToReceiveAdWithError={adError}
                     />
                 }
             </View>
+            {/*<View style={{width:screenWidth,height:100,backgroundColor:"red"}}/>*/}
             </View>
-        </SafeAreaView>
+        </View>
     )
 }
 

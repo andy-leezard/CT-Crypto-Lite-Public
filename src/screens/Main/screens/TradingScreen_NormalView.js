@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useLayoutEffect } from 'react'
 import { StyleSheet, Text, View, ScrollView, Image, TouchableOpacity, Dimensions, Platform } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { LineChart } from "react-native-chart-kit";
 import { useColorScheme } from "react-native-appearance";
 import { AdMobBanner} from 'expo-ads-admob';
@@ -18,19 +17,56 @@ const screenWidth = Dimensions.get("window").width;
 const width = screenWidth-20;
 const screenHeight = Dimensions.get("window").height;
 
-const TradingScreen = ({route,navigation}) => {
+const TradingScreen_NormalView = ({route,navigation}) => {
     const { email, imgurl, sparkline, tradingCoin, coinprice, coinsymbol, upgraded, bannerID, ispro, rank } = route.params;
     const [tradingdatainterval, settradingdatainterval] = useState("1D");
     const scheme = useColorScheme();
     const [fav,setFav] = useState([]);
+
     useEffect(() => {
         db.collection('users').doc(route.params.email).get().then((doc)=>{
             setFav(doc.data().favorites);
         });
     }, [])
+
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            title: ``,
+            headerStyle:{backgroundColor:bgColor()},
+            headerLeft: () => (
+                <View style={{flexDirection:"row",alignItems:"center",alignSelf:"flex-start",width:screenWidth,justifyContent:"space-between"}}>
+                    <TouchableOpacity onPress={()=>navigation.goBack()} style={{flexDirection:"row",alignItems:"center",marginLeft:10}} >
+                        <Image source={require("../../../assets/icons/1x/arrow_darkmode_flipped.png")} style={[{width:20,height:20},(!bool_isDarkMode())&&{tintColor:"#000000"}]}/>
+                        <View style={{position:"absolute",width:24,height:24,borderRadius:6,backgroundColor:"white",marginLeft:20}} />
+                        <Image source={{uri:imgurl}} style={{width:18,height:18,marginLeft:3}}/>
+                        <Text style={{fontSize:20,fontWeight:"bold",color:textColor(),marginLeft:5}}>{tradingCoin}</Text>
+                        <Text style={{fontSize:14,fontWeight:"bold",color:subTextColor(),marginLeft:3,alignSelf:"flex-start",paddingTop:2}}>Rank #{rank}</Text>
+                    </TouchableOpacity>
+                </View>
+            ),
+            headerRight: () => (
+                <TouchableOpacity 
+                    onPress={()=>toggleRegisterFavorite(tradingCoin)}
+                    style={[{width:30,height:30,borderRadius:5,borderWidth:2,justifyContent:"center",alignItems:"center",marginRight:10},isInFavorite(tradingCoin)?{borderColor:"#BCAB34"}:{borderColor:"#519ABA"}]}>
+                {isInFavorite(tradingCoin) ? (
+                <Image
+                    source={require("../../../assets/icons/1x/star2.png")}
+                    style={{width:20,height:20,tintColor:"#BCAB34"}}
+                />) : (
+                <Image
+                    source={require("../../../assets/icons/1x/star.png")}
+                    style={{width:20,height:20,tintColor:"#519ABA"}}
+                />)}
+                </TouchableOpacity>
+            )
+        });
+    }, [fav.length])
     
     const bool_isDarkMode = () => {
         return scheme === "dark";
+    }
+    const bgColor = () => {
+        return bool_isDarkMode() ? "#000000":"#FFFFFF";
     }
     const containerColor = () => {
         return bool_isDarkMode() ? "#1c1c1c":"#e8e8e8";
@@ -73,9 +109,9 @@ const TradingScreen = ({route,navigation}) => {
     }
     const dynamicMargin = () => {
         if(ispro){
-            return (Platform.OS === 'ios') ? 179:122;
+            return (Platform.OS === 'ios') ? 203:156;
         }else{
-            return (Platform.OS === 'ios') ? 239:182;
+            return (Platform.OS === 'ios') ? 263:216;
         }
     }
     function removeItemFromArray(arr, value) {
@@ -173,31 +209,8 @@ const TradingScreen = ({route,navigation}) => {
     }
 
     return (
-        <SafeAreaView>
+        <View style={{flex:1,paddingTop:10,backgroundColor:bgColor()}}>
             <View style={{alignItems: 'center',justifyContent: "flex-start",}}>
-                <View style={{flexDirection:"row",alignItems:"center",alignSelf:"flex-start",width:screenWidth,justifyContent:"space-between",marginBottom:5}}>
-                    <TouchableOpacity onPress={()=>navigation.goBack()} style={{flexDirection:"row",alignItems:"center",marginLeft:10}} >
-                            <Image source={require("../../../assets/icons/1x/arrow_darkmode_flipped.png")} style={[{width:20,height:20},(!bool_isDarkMode())&&{tintColor:"#000000"}]}/>
-                            <View style={{position:"absolute",width:24,height:24,borderRadius:6,backgroundColor:"white",marginLeft:20}} />
-                            <Image source={{uri:imgurl}} style={{width:18,height:18,marginLeft:3}}/>
-                            <Text style={{fontSize:20,fontWeight:"bold",color:textColor(),marginLeft:5}}>{tradingCoin}</Text>
-                            <Text style={{fontSize:14,fontWeight:"bold",color:subTextColor(),marginLeft:3,alignSelf:"flex-start",paddingTop:2}}>Rank #{rank}</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity 
-                        onPress={()=>toggleRegisterFavorite(tradingCoin)}
-                        style={[{width:26,height:26,borderRadius:5,borderWidth:2,justifyContent:"center",alignItems:"center",marginRight:10},isInFavorite(tradingCoin)?{borderColor:"#BCAB34"}:{borderColor:"#519ABA"}]}>
-                    {isInFavorite(tradingCoin) ? (
-                    <Image
-                        source={require("../../../assets/icons/1x/star2.png")}
-                        style={{width:18,height:18,tintColor:"#BCAB34"}}
-                    />) : (
-                    <Image 
-                        source={require("../../../assets/icons/1x/star.png")}
-                        style={{width:18,height:18,tintColor:"#519ABA"}}
-                    />)}
-                    </TouchableOpacity>
-                </View>
-
                 <View style={{height:screenHeight-dynamicMargin(),marginBottom:1}}>
                     <KeyboardAvoidingView style={{flex:1}} behavior={Platform.OS === "ios" ? "padding" : "height"} keyboardVerticalOffset={Platform.OS === "ios" ? 85:95}>
                         <ScrollView>
@@ -208,6 +221,7 @@ const TradingScreen = ({route,navigation}) => {
                                 </View>
                                 <RenderScreen/>
                                 <Trader coinname={tradingCoin} user={email} coinprice={coinprice} coinsymbol={coinsymbol} coinIcon={imgurl} upgraded={upgraded}/>
+                                <View style={{height:30}}/>
                             </View>
                         </ScrollView>
                     </KeyboardAvoidingView>
@@ -224,11 +238,11 @@ const TradingScreen = ({route,navigation}) => {
                 </View>
                 {/*<View style={{width:screenWidth,height:100,backgroundColor:"red"}}/>*/}
             </View>
-        </SafeAreaView>
+        </View>
     )
 }
 
-export default TradingScreen
+export default TradingScreen_NormalView
 
 const styles = StyleSheet.create({
     interval_btnTab:{

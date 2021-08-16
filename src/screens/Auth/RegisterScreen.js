@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, KeyboardAvoidingView, TextInput, Platform } from 'react-native';
+import { StyleSheet, Text, View, TextInput, ImageBackground } from 'react-native';
 import { Button, Image } from 'react-native-elements';
 import { StatusBar } from 'expo-status-bar';
 import { db, auth } from '../../../firebase';
@@ -19,9 +19,6 @@ const RegisterScreen = ({navigation}) => {
     const brandTextColor = () => {
         return bool_isDarkMode() ? Env.brandText_Dark:Env.brandText_Light;
     }
-    const subTextColor = () => {
-        return bool_isDarkMode() ? "#CCCCCC":"#8F8F8F";
-    }
 
     function isValidEmailAddress(address) {
         return !! address.match(/.+@.+/);
@@ -29,7 +26,6 @@ const RegisterScreen = ({navigation}) => {
 
     const registerHandler = () => {
         let loweremail = email.toLowerCase();
-        console.log("lower email is :",loweremail);
         if(username.length <2){
         setRedoInfo(true);setmsg_error("Username is too short");return;
         }else if(email.length <8){
@@ -39,7 +35,19 @@ const RegisterScreen = ({navigation}) => {
         }else if(password.length <6){
         setRedoInfo(true);setmsg_error("Password is too simple");return;
         }else{
-           db
+            Promise.all([initializeData(loweremail),initializeHistory(loweremail),createUser(loweremail)])
+            .then(() => {
+                console.log("successfully created user : ", loweremail);
+            })
+            .catch((err)=>{
+                handleError(err);
+            });
+        }
+    }
+
+    const initializeData = (loweremail) => {
+        return new Promise((resolve,reject)=>{
+            db
             .collection('users')
             .doc(loweremail)
             .set({
@@ -54,34 +62,51 @@ const RegisterScreen = ({navigation}) => {
                 pro: false,
                 boughtPro: false
             })
-            .then(()=>{
-                auth
-                .createUserWithEmailAndPassword(loweremail,password)
-                .then(() => {
-                    //it successfully created a new user with email and password.
-                    db
-                    .collection('users')
-                    .doc(loweremail)
-                    .collection("history")
-                    .add({
-                        type: "Received",
-                        target: "VUSD",
-                        targetName: "Virtual USD",
-                        quantity: 1000,
-                        fiat: 0,
-                        price: 1,
-                        imgsrc: "https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/usd_custom.png?alt=media&token=857456bf-e06b-4fc6-95a2-72f1d69212dc",
-                        orderNum: Number(new Date().getTime()).toString().substring(0, 10),
-                        time: simplifyDate_history(new Date())
-                    })
-                    .catch(error => {handleError(error);})
-                    setRedoInfo(false);
-                    console.log('User account created & signed in!');
-                })
-                .catch(error => {handleError(error);})
+            .then(resolve)
+            .catch(reject)
+      })
+    }
+    const initializeHistory = (loweremail) => {
+        return new Promise((resolve,reject)=>{
+            let bonus = Number();
+            db.collection('globalEnv')
+            .doc('variables').get()
+            .then((doc)=>{
+                (doc.exists) ? bonus = doc.data().starting_bonus ?? 1000 : 1000;
             })
-            .catch((error)=>{handleError(error);})
-        }
+            .then(()=>{
+                db
+                .collection('users')
+                .doc(loweremail)
+                .collection("history")
+                .add({
+                    type: "Received",
+                    target: "VUSD",
+                    targetName: "Virtual USD",
+                    quantity: bonus,
+                    fiat: 0,
+                    price: 1,
+                    imgsrc: Env.fiatCoinIcon,
+                    orderNum: Number(new Date().getTime()).toString().substring(0, 10),
+                    time: simplifyDate_history(new Date())
+                })
+                .then(resolve)
+                .catch(reject)
+            })
+        })
+    }
+    const createUser = (loweremail) => {
+        return new Promise((resolve,reject)=>{
+            auth.createUserWithEmailAndPassword(loweremail,password)
+            .then(() => {
+                if(auth.currentUser){
+                    auth.currentUser.sendEmailVerification();
+                    console.log("User successfully created & asked for email verification :", auth.currentUser.email);
+                    resolve();
+                }
+            })
+            .catch(reject)
+        })
     }
 
     const handleError = (e) => {
@@ -107,59 +132,59 @@ const RegisterScreen = ({navigation}) => {
     }
 
     return (
-        <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : "height"}>
+        <ImageBackground source={require('../../assets/bg/bg.png')} style={styles.container} >
             <StatusBar style="auto"/>
             <View style={{alignItems: 'center', justifyContent: 'center',}}>
                 <View>
                     <Image
-                    source={require('../../assets/icon.png')}
-                    style={[{width:40,height:40,marginBottom:5,marginTop:100,},(Platform.OS === 'ios') && {borderRadius:5}]}
+                    source={require('../../assets/icon_rounded.png')}
+                    style={{width:40,height:40,marginBottom:5,marginTop:80,}}
                     />
                 </View>
-                <Text style={{color:brandTextColor(),marginBottom:40,fontSize:20,fontWeight:"bold"}}>CoinTracer</Text>
-                <View style={{width:300, alignItems:"center"}}>
-                    {redoInfo && (<View style={{backgroundColor:"#FA8283",borderWidth:1,borderColor:"#FDD7D8",borderRadius:5,padding:5,marginBottom:10}}>
+                <Text style={{color:"#FFFFFF",fontSize:24,fontWeight:"bold",textShadowColor:brandTextColor(),textShadowOffset:{width: 1, height: 1},textShadowRadius:6}}>Your new trader ID</Text>
+                <View style={{width:300, alignItems:"center",marginTop:40}}>
+                    {redoInfo && (<View style={{backgroundColor:"rgba(0,0,0,0.5)",borderWidth:1,borderColor:"#FDD7D8",borderRadius:5,padding:5}}>
                         <Text style={{color:"#ffffff",fontSize:15,fontWeight:"700"}}>{msg_error}</Text>
                     </View>)}
                     <TextInput
-                        style={[styles.input,bool_isDarkMode()?styles.darkTheme:styles.lightTheme]}
+                        style={[styles.input,{backgroundColor: 'rgba(0,0,0,0.25)'}]}
                         autoFocus={true}
                         placeholder="Username"
-                        placeholderTextColor={subTextColor()}
+                        placeholderTextColor={"#CCCCCC"}
                         value={username}
                         onChangeText={setUsername}
                         maxLength = {20}
                     />
                     <TextInput
-                        style={[styles.input,bool_isDarkMode()?styles.darkTheme:styles.lightTheme]}
+                        style={[styles.input,{backgroundColor: 'rgba(0,0,0,0.25)'}]}
                         placeholder="Email"
-                        placeholderTextColor={subTextColor()}
+                        placeholderTextColor={"#CCCCCC"}
                         value={email}
                         onChangeText={setEmail}
                         maxLength = {32}
                     />
                     <TextInput
-                        style={[styles.input,bool_isDarkMode()?styles.darkTheme:styles.lightTheme]}
+                        style={[styles.input,{backgroundColor: 'rgba(0,0,0,0.25)'}]}
                         secureTextEntry={true}
                         placeholder="Password"
-                        placeholderTextColor={subTextColor()}
+                        placeholderTextColor={"#CCCCCC"}
                         value={password}
                         onChangeText={setPassword} onSubmitEditing={registerHandler}
                         maxLength = {64}
                     />
                 </View>
                 <View style={styles.btn}>
-                  <Button buttonStyle={{backgroundColor:"#665CAF",borderRadius:5}} titleStyle={{color: "#ffffff", fontSize: 16, fontWeight:"bold"}} title="register" onPress={registerHandler}/>
+                  <Button buttonStyle={{backgroundColor:"#FFFFFF",borderRadius:5}} titleStyle={{color: "#4784ff", fontSize: 19, fontWeight:"bold"}} title="register" onPress={registerHandler}/>
                 </View>
                 <View style={styles.btn}>
-                  <Button buttonStyle={{backgroundColor:"#69648f",borderRadius:5}} titleStyle={{color: "#ffffff", fontSize: 16, fontWeight:"bold"}} title="cancel" onPress={()=>navigation.goBack()}/>
+                  <Button buttonStyle={{backgroundColor:"#69648f",borderRadius:5}} titleStyle={{color: "#ffffff", fontSize: 16, fontWeight:"bold"}} title="back" onPress={()=>navigation.goBack()}/>
                 </View>
-                <View>
-                    <Text style={{color:brandTextColor(),fontSize:14,fontWeight:"600",marginTop:20, alignSelf:"center"}}>© 2021 | Developed by Andy Lee</Text>
-                    <Text style={{color:brandTextColor(),fontSize:12,fontWeight:"600",marginTop:10, alignSelf:"center"}}>{Env.currentVersion}</Text>
+                <View style={{alignItems:"center",marginTop:50}}>
+                    <Text style={{color:"#FFFFFF",fontSize:14,fontWeight:"600",textShadowColor:brandTextColor(),textShadowOffset:{width: 1, height: 1},textShadowRadius:4,marginTop:20}}>© 2021 | Developed by Andy Lee</Text>
+                    <Text style={{color:"#FFFFFF",fontSize:14,fontWeight:"600",textShadowColor:brandTextColor(),textShadowOffset:{width: 1, height: 1},textShadowRadius:4,marginTop:10}}>{Env.currentVersion}</Text>
                 </View>
             </View>
-        </KeyboardAvoidingView>
+        </ImageBackground>
     )
 }
 
@@ -176,22 +201,14 @@ const styles = StyleSheet.create({
         height: 40,
         width: 300,
         margin: 12,
-        borderWidth: 1,
-        borderRadius: 15,
+        borderRadius: 10,
         fontSize:20,
+        color: "#FFFFFF",
     },
     btn: {
-        marginBottom: 15,
+        marginBottom: 10,
         marginTop: 5,
-        width:160,
+        width:170,
         height:40,
-    },
-    darkTheme: {
-        color: "#FFFFFF",
-        backgroundColor: "#333333"
-    },
-    lightTheme: {
-        color: "#000000",
-        backgroundColor: "#FFFFFF"
     }
 })

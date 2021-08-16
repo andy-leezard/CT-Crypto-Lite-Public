@@ -2,7 +2,6 @@ import React, { useRef, useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Image, Dimensions, ScrollView, TextInput, Platform, Picker } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
-import Favorite_icon from './Favorite_icon';
 import Trace_RenderGlobalChange from './Trace_RenderGlobalChange';
 import Env from '../env.json';
 import { db } from '../../firebase';
@@ -12,7 +11,7 @@ import { AdMobBanner} from 'expo-ads-admob';
 import ReactNativePickerModule from "react-native-picker-module";
 import stablecoins from '../stablecoins.json';
 
-const initialLimit = 20;
+const initialLimit = 21;
 const listTab = [
     {status: "Prices",},{status: "Market Cap",},{status: "24H",},
 ];
@@ -49,7 +48,7 @@ const options = [
 ];
 const screenWidth = Dimensions.get("window").width;
 
-const Prices = ({userEmail,fav,coindata,changeData,ispro,bannerID,upgraded}) => {
+const Prices = ({userEmail,fav,coindata,changeData,ispro,bannerID,upgraded,isTablet}) => {
     const navigation = useNavigation();
     const [status, setStatus] = useState("Prices"); //By default we want to show all status
     const [renderFavorites, setRenderFavorites] = useState(false);
@@ -133,26 +132,22 @@ const Prices = ({userEmail,fav,coindata,changeData,ispro,bannerID,upgraded}) => 
 
     const dynamicMargin = () => {
         if(Platform.OS === "ios"){
-            return (ispro) ? 318:378;
+            return (ispro) ? 323:383;
         }else{
-            return (ispro) ? 264:324;
+            return (ispro) ? 270:330;
         }
     }
 
-    function removeItemOnce(arr, value) {
+    function removeItemFromArray(arr, value) {
         let index = arr.indexOf(value);
         if (index > -1) {arr.splice(index, 1);}
         return arr;
     }
 
     const toggleRegisterFavorite = (name) => {
-        if(isInFavorite(name)){
-            let tempo = [...fav];tempo = removeItemOnce(tempo,name);
-            db.collection('users').doc(userEmail).update({favorites: tempo,}).then(()=> {console.log("deleted favorite : ", name)})
-        }else{
-            let tempo = [...fav];tempo.push(name);
-            db.collection('users').doc(userEmail).update({favorites: tempo,}).then(()=> {console.log("added favorite : ", name)})
-        }
+        let tempo = [...fav];
+        (isInFavorite(name)) ? tempo = removeItemFromArray(tempo,name) : tempo.push(name);
+        db.collection('users').doc(userEmail).update({favorites: tempo,});
     }
 
     function isCloseToBottom({layoutMeasurement, contentOffset, contentSize}){
@@ -161,6 +156,12 @@ const Prices = ({userEmail,fav,coindata,changeData,ispro,bannerID,upgraded}) => 
 
     const handleBottomClose = () => {
         (limit<=230) ? setlimit(limit + 20):setlimit(250);
+    }
+    const openTrade = (coin) => {
+        navigation.navigate('Stack_Prices_Trading',{email:userEmail,imgurl:coin.image,rank:coin.market_cap_rank,sparkline:coin.sparkline_in_7d.price,tradingCoin:coin.name,coinprice:coin.current_price,coinsymbol:coin.symbol.toUpperCase(),upgraded:upgraded,bannerID:bannerID,ispro:ispro});
+    }
+    const adError = (e) => {
+        console.log("Error showing banner ad ! : ",e);
     }
 
     const ParseChangeByInterval = (i) => {
@@ -178,11 +179,16 @@ const Prices = ({userEmail,fav,coindata,changeData,ispro,bannerID,upgraded}) => 
         else if(Math.round(prix_num)<1){potentiallysmall = true;}
         let prix = i.crntprice.toString();
         if(prix.length > 8 && potentiallysmall===true){
-            let inCents = i.crntprice *100;
-            let inCents_str = inCents.toString().substring(0, 8);
-            prix = "¢"+inCents_str;
+            prix = "$"+prix;
+            /*if(isTablet!==1){
+                prix = "$"+prix;
+            }else{
+                let inCents = i.crntprice *100;
+                let inCents_str = inCents.toString().substring(0, 8);
+                prix = "¢"+inCents_str;
+            }*/
         }else{
-            if(above1k===true){
+            if(above1k===true && isTablet===1){
                 prix_num = prix_num / 1000;
                 prix_num = Math.round(prix_num * 100) / 100 ;
                 let asString = prix_num.toString();
@@ -220,13 +226,26 @@ const Prices = ({userEmail,fav,coindata,changeData,ispro,bannerID,upgraded}) => 
             asString24price = asString24price+"%";
             activeColor24price = sellColor();
         }
-
-        return(
-        <View style={{width:135}}>
-            <Text style={{color:activeColor24price,fontSize:17,fontWeight:"bold",textAlign:"right"}}>{(status==="Market Cap") ? vol_str:prix}</Text>
-            <Text style={{color:textColor(),fontSize:12,fontWeight:"bold",color:activeColor24price,textAlign:"right"}}>{asString24price}</Text>
-        </View>
-        )
+        
+        if(isTablet===2){
+            return(
+            <View style={{flexDirection:"row", width:screenWidth/2, justifyContent:"space-between"}}>
+                <View style={{justifyContent:"center",alignItems:"center",marginRight:15}}>
+                    <Text style={{color:activeColor24price,fontWeight:"bold",fontSize:20}}>{(status==="Market Cap") ? vol_str:prix}</Text>
+                </View>
+                <View style={{backgroundColor:activeColor24price,borderRadius:10,width:85,height:34,justifyContent:"center",alignItems:"center"}}>
+                    <Text style={{color:"white",fontWeight:"bold",fontSize:16}}>{asString24price}</Text>
+                </View>
+            </View>
+            )
+        }else{
+            return(
+            <View style={{width:screenWidth/2.55}}>
+                <Text style={{color:activeColor24price,fontSize:17,fontWeight:"bold",textAlign:"right"}}>{(status==="Market Cap") ? vol_str:prix}</Text>
+                <Text style={{fontSize:12,fontWeight:"bold",color:activeColor24price,textAlign:"right"}}>{asString24price}</Text>
+            </View>
+            )
+        }
     }
 
     const RenderByOption = () => {
@@ -248,28 +267,31 @@ const Prices = ({userEmail,fav,coindata,changeData,ispro,bannerID,upgraded}) => 
         return(
             <>
             {finaldata.map((coin)=>(
-                <View key={coin.id} style={{alignSelf:"center"}}>
+                <View key={coin.id}>
                     <View style={{flexDirection:"row",justifyContent:"space-between",alignItems:"center",height:50,width:"100%"}}>
-                        <TouchableOpacity onPress={() => toggleRegisterFavorite(coin.name)}>
-                            <View style={{marginLeft:20,justifyContent:"center"}}>
-                                <View style={{position:"absolute",width:38,height:38,borderRadius:8,backgroundColor:"white",alignSelf:"center"}} />
-                                <Image
-                                    source={{uri:coin.image}}
-                                    style={{width:32,height:32}}
-                                />
-                            </View>
-                            {isInFavorite(coin.name) && (<Favorite_icon w={10} h={10}/>)}
-                        </TouchableOpacity>
-                        <TouchableOpacity style={{flex:1,marginLeft:10, alignSelf:"center"}} onPress={()=>navigation.navigate('Stack_Prices_Trading',{email:userEmail,imgurl:coin.image,sparkline:coin.sparkline_in_7d.price,tradingCoin:coin.name,coinprice:coin.current_price,coinsymbol:coin.symbol.toUpperCase(),upgraded:upgraded,bannerID:bannerID,ispro:ispro})}>
-                            {(coin.name.length<=17)?(
-                                <Text style={{color:textColor(),fontSize:17,fontWeight:"bold"}}>{coin.name}</Text>
-                            ):(
-                                <Text style={{color:textColor(),fontSize:17,fontWeight:"bold"}}>{coin.symbol.toUpperCase()}</Text>
-                            )}
-                            <Text style={{color:subTextColor(),fontSize:14,fontWeight:"bold"}}>{coin.symbol.toUpperCase()}</Text>
-                        </TouchableOpacity>
+                        <View style={{flexDirection:"row",alignItems:"center"}}>
+                            <TouchableOpacity onPress={() => toggleRegisterFavorite(coin.name)}>
+                                <View style={{marginLeft:6,justifyContent:"center",width:38,height:38,borderRadius:8,backgroundColor:"white",alignItems:"center"}}>
+                                    <Image
+                                        source={{uri:coin.image}}
+                                        style={{width:32,height:32}}
+                                    />
+                                </View>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={{marginLeft:12, alignSelf:"center",width:screenWidth/2.5}} onPress={()=>openTrade(coin)}>
+                                {(coin.name.length<=17 || isTablet!==1)?(
+                                    <Text style={{color:textColor(),fontSize:17,fontWeight:"bold"}}>{coin.name}</Text>
+                                ):(
+                                    <Text style={{color:textColor(),fontSize:17,fontWeight:"bold"}}>{coin.symbol.toUpperCase()}</Text>
+                                )}
+                                <View style={{flexDirection:"row",alignItems:"center"}}>
+                                    {isInFavorite(coin.name) && (<Image source={require('../assets/icons/1x/star2.png')} style={{height:10,width:10,marginRight:5,tintColor:"#BCAB34"}}/>)}
+                                    <Text style={{color:subTextColor(),fontSize:14,fontWeight:"bold"}}>{coin.symbol.toUpperCase()} {(keyword.length>0 || isTablet!==1 || status==="24H") && `- rank #${coin.market_cap_rank}`}</Text>
+                                </View>
+                            </TouchableOpacity>
+                        </View>
                         <TouchableOpacity style={{flexDirection:"row", justifyContent:"space-between", alignSelf:"center", marginRight:15}}
-                                onPress={()=>navigation.navigate('Stack_Prices_Trading',{email:userEmail,imgurl:coin.image,sparkline:coin.sparkline_in_7d.price,tradingCoin:coin.name,coinprice:coin.current_price,coinsymbol:coin.symbol.toUpperCase(),upgraded:upgraded,bannerID:bannerID,ispro:ispro})}>
+                                onPress={()=>openTrade(coin)}>
                             <ParseChangeByInterval
                                 change1h = {coin.price_change_percentage_1h_in_currency}
                                 change24h = {coin.price_change_percentage_24h_in_currency}
@@ -296,8 +318,8 @@ const Prices = ({userEmail,fav,coindata,changeData,ispro,bannerID,upgraded}) => 
             <View style={{alignItems:"center"}}>
                 <TouchableOpacity style={{alignItems:"center"}}>
                     <Image
-                        source={require('../assets/icon.png')}
-                        style={[{width:25,height:25,marginTop:-5,},(Platform.OS === 'ios') && {borderRadius:5}]}
+                        source={require('../assets/icon_rounded.png')}
+                        style={{width:25,height:25,marginTop:0,}}
                     />
                 </TouchableOpacity>
             </View>
@@ -421,11 +443,11 @@ const Prices = ({userEmail,fav,coindata,changeData,ispro,bannerID,upgraded}) => 
                 bannerSize="fullBanner"
                 adUnitID={bannerID} // Test ID, Replace with your-admob-unit-id
                 servePersonalizedAds // true or false
-                //onDidFailToReceiveAdWithError={this.bannerError}
+                onDidFailToReceiveAdWithError={adError}
                 />
             }
             </View>
-            {/*<View style={{backgroundColor:"red",height:150,width:screenWidth}}/>*/}
+            {<View style={{backgroundColor:"red",height:150,width:screenWidth}}/>}
         </View>
         </SafeAreaView>
     )

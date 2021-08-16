@@ -103,6 +103,9 @@ const GlobalDetails = ({route,navigation}) => {
             return "$"+intrillion.toString()+"T";
         }
     }
+    const adError = (e) => {
+        console.log("Error showing banner ad ! : ",e);
+    }
 
     return (
         <SafeAreaView style={{flex:1, backgroundColor:bgColor()}}>
@@ -148,10 +151,10 @@ const GlobalDetails = ({route,navigation}) => {
                                                 <Text style={{fontSize:13,fontWeight:"bold",color:subTextColor(),marginLeft:9}}>{i.symbol}</Text>
                                             </View>
                                         </View>
-                                        <View style={{justifyContent:"center",alignItems:"center"}}>
-                                            <Text style={{color:dynamicColor(i.change),fontWeight:"bold",fontSize:20}}>{displayVolume(i.cap)}</Text>
+                                        <View style={{justifyContent:"center",alignItems:"center",marginRight:15}}>
+                                            <Text style={{color:dynamicColor(i.change),fontWeight:"bold",fontSize:18}}>{displayVolume(i.cap)}</Text>
                                         </View>
-                                        <View style={{backgroundColor:dynamicColor(i.change),borderRadius:10,width:65,height:35,justifyContent:"center",alignItems:"center"}}>
+                                        <View style={{backgroundColor:dynamicColor(i.change),borderRadius:10,width:65,height:34,justifyContent:"center",alignItems:"center"}}>
                                             <Text style={{color:"white",fontWeight:"bold",fontSize:14}}>{displayPercentage(round_it(i.change))}</Text>
                                         </View>
                                     </View>
@@ -170,10 +173,11 @@ const GlobalDetails = ({route,navigation}) => {
                     bannerSize="fullBanner"
                     adUnitID={bannerID} // Test ID, Replace with your-admob-unit-id
                     servePersonalizedAds // true or false
-                    //onDidFailToReceiveAdWithError={this.bannerError}
+                    onDidFailToReceiveAdWithError={adError}
                     />
                 }
             </View>
+            {/*<View style={{width:screenWidth,height:100,backgroundColor:bgColor()}}/>*/}
         </SafeAreaView>
     )
 }

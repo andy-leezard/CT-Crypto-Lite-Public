@@ -20,7 +20,7 @@ const TNC = ({candeleteacc}) => {
         <Text style={{fontSize: 20,fontWeight: "700",color:colors.text}}>Privacy & Account</Text>
         <Text style={{fontSize: 14,fontWeight: "500",color:colors.text}}>To use the Service, you need to create an account. By doing so, you acknowledge that you fully understand and agree with the Terms of use.</Text>
         <Text style={{fontSize: 14,fontWeight: "500",color:colors.text}}>It is recommended to use a real email address in order to receive expected emails such as legal notifications and password reset requests. Any problem caused by disregarding this recommendation will be solely of your responsibility.</Text>
-        <Text style={{fontSize: 14,fontWeight: "500",color:colors.text}}>This app stores data that is directly provided by the user in the backend server storage. The user data can be permanently deleted on demand. All deleted user data is irrecoverable. You can delete your account at any time. {candeleteacc}</Text>
+        <Text style={{fontSize: 14,fontWeight: "500",color:colors.text}}>This app stores data that is directly provided by the user in the backend server storage. The user data can be permanently deleted on demand by deleting user account. All deleted user data is irrecoverable. You can delete your account at any time. {candeleteacc}</Text>
         <Text style={{fontSize: 20,fontWeight: "700",color:colors.text}}>License</Text>
         <Text style={{fontSize: 14,fontWeight: "500",color:colors.text}}>This License Agreement is between you and CoinTracer, and governs your use of the CoinTracer app made available for use on smartphones and other electronic devices.</Text>
         <Text style={{fontSize: 14,fontWeight: "500",color:colors.text}}>CoinTracer grants you a limited, non-exclusive, non-transferable and revocable license to use the CoinTracer App for your personal, non-commercial purposes. You may only use the CoinTracer app on a device that you own or control and that is permitted by any applicable usage rules applied by your device's manufacturer or by the marketplace at which I have made the app available.</Text>
@@ -36,7 +36,6 @@ const TNC = ({candeleteacc}) => {
         <Text style={{fontSize: 14,fontWeight: "500",color:colors.text}}>These terms shall be governed by and constructed in accordance with French law, and any dispute between you and CoinTracer relating to these Terms will be subject to the exclusive jurisdiction of the courts of France.</Text>
         <Text style={{fontSize: 20,fontWeight: "700",color:colors.text}}>Contacts</Text>
         <Text style={{fontSize: 14,fontWeight: "500",color:colors.text}}>You are always welcome to contact CoinTracer for any feedback, questions, complaints or claims you may have related to the Service. Please direct your requests to: @AndyLee_dev (Twitter)</Text>
-
     </View>
     )
 }

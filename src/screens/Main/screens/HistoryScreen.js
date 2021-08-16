@@ -1,52 +1,58 @@
-import React, { useEffect, useState} from 'react';
-import { Text, View, Dimensions, TouchableOpacity, Image, ScrollView, Platform } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, { useEffect, useState, useLayoutEffect } from 'react';
+import { Text, View, Dimensions, TouchableOpacity, Image, Platform, FlatList } from 'react-native';
 import { useColorScheme } from "react-native-appearance";
 import { AdMobBanner} from 'expo-ads-admob';
 import Env from '../../../env.json';
 import { db } from '../../../../firebase';
-import Loading from '../../../components/Loading';
+import { Alert } from 'react-native';
+import * as firebase from "firebase";
+
+const screenWidth = Dimensions.get("window").width;
+const width = Dimensions.get("window").width-20;
+const screenHeight = Dimensions.get("window").height;
 
 const HistoryScreen = ({route, navigation}) => {
     const scheme = useColorScheme();
     const [history, setHistory] = useState([]);
-    const { email, ispro, bannerID } = route.params;
-    const [limit, setlimit] = useState(20);
-
-    const width = Dimensions.get("window").width-20;
-    const screenHeight = Dimensions.get("window").height;
+    const { ispro, bannerID, isTablet } = route.params;
+    const [editStatus, setEditStatus] = useState(false);
+    const [selected, setSelected] = useState([]);
 
     useEffect(() => {
-        if(typeof email === "string"){
-            //console.log("HistoryScren.js - user email is :",email)
-            db.collection('users').doc(route.params.email).collection('history').orderBy("orderNum", "desc").limit(limit).get()
-                  .then((querySnapshot) => {
-                    //console.log("HistoryScren.js - Updated history");
-                    let arr = (querySnapshot.docs.map(order => ({
-                        id: order.id,
-                        type: order.data().type,
-                        time: order.data().time,
-                        target: order.data().target,
-                        quantity: order.data().quantity,
-                        price: order.data().price,
-                        fiat: order.data().fiat,
-                        imgsrc: order.data().imgsrc
-                    })));
-                    //console.log(arr);
-                    setHistory(arr);
-                  })
-                  .catch((err)=>{
-                    console.log(err);
-                    setHistory(Array());
-                  });
-        }
-    }, [route,limit])
+        const unsubscribe = 
+            db.collection('users').doc(route.params.email).collection('history').orderBy("orderNum", "desc").onSnapshot((querySnapshot) => {
+                console.log("HistoryScreen - snapshot triggered at",new Date().toLocaleString());
+                let arr = (querySnapshot.docs.map(order => ({
+                    id: order.id,
+                    type: order.data().type,
+                    time: order.data().time,
+                    target: order.data().target,
+                    quantity: order.data().quantity,
+                    price: order.data().price,
+                    fiat: order.data().fiat,
+                    imgsrc: order.data().imgsrc,
+                })));
+                //console.log(arr);
+                setHistory(arr);
+            }, (err) => {
+                console.log(err);
+                setHistory(Array());
+            });
+        return unsubscribe;
+    }, [])
+
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            headerRight: () => (
+                <TouchableOpacity style={{marginRight:18}} onPress={()=> (selected.length>0) ? deleteSelected():toggleEditStatus()}>
+                    <Text style={{fontSize:20,fontWeight:"bold",color:"#FFFFFF"}}>{editStatus ? actionText():"Edit"}</Text> 
+                </TouchableOpacity>
+            )
+        });
+    }, [selected.length,editStatus])
 
     const bool_isDarkMode = () => {
         return scheme === "dark";
-    }
-    const bgColor = () => {
-        return bool_isDarkMode() ? "#000000":"#FFFFFF";
     }
     const containerColor = () => {
         return bool_isDarkMode() ? "#1c1c1c":"#e8e8e8";
@@ -81,9 +87,9 @@ const HistoryScreen = ({route, navigation}) => {
     }
     const dynamicMargin = () => {
         if(ispro){
-            return (Platform.OS === "ios") ? 194:138;
+            return (Platform.OS === "ios") ? 209:162;
         }else{
-            return (Platform.OS === "ios") ? 254:198;
+            return (Platform.OS === "ios") ? 269:222;
         }
     }
     const dynamicRound = (i,j) => {
@@ -93,73 +99,148 @@ const HistoryScreen = ({route, navigation}) => {
         if(i>0){
             return i;
         }else if(i===0){
-            return "free";
+            return "";
         }else{
-            return "upgrade";
+            return "for upgrade";
         }
     }
+    const toggleEditStatus = () => {
+        setEditStatus(!editStatus);
+    }
 
-    const InternalLoadingScreen = () => {
+    const addItem = (id) => {
+        let arr = [... selected];
+        if(selected.includes(id)){
+            arr = removeItemFromArray(arr,id);
+            setSelected(arr);
+        }else{
+            arr.push(id);
+            setSelected(arr);
+        }
+        console.log(arr);
+    }
+
+    function removeItemFromArray(arr, value) {
+        let index = arr.indexOf(value);
+        if (index > -1) {arr.splice(index, 1);}
+        return arr;
+    }
+    const adError = (e) => {
+        console.log("Error showing banner ad ! : ",e);
+    }
+
+    const Item = ({i}) => {
+        let _selected =  selected.includes(i.id);
         return(
-            <View>
-                <Text style={{color:textColor(),alignSelf:"center", marginTop:20, marginBottom:40}}>fetching data...</Text>
-                <View style={{alignSelf:"center"}}>
-                    <Loading width={40} height={40}/>
+        <TouchableOpacity onPress={()=>editStatus ? addItem(i.id):alert_delete(i)}>
+            <View style={[{flexDirection:"row",height:50,padding:5,margin:2,alignItems:"center",borderRadius:5},(i.type==="Sold" || i.type === "Spent")?{backgroundColor:sellColor()}:{backgroundColor:buyColor()}]}>
+                {(editStatus&&_selected) && (<Image source={require('../../../assets/icons/1x/dot.png')} style={{width:29,height:29,marginLeft:2,marginRight:5}}/>)}
+                {(editStatus&&!_selected) && (<Image source={require('../../../assets/icons/1x/dot_2.png')} style={{width:29,height:29,marginLeft:2,marginRight:5}}/>)}
+                <View style={{width:34,height:34,borderRadius:8,backgroundColor:"white",justifyContent:"center",alignItems:"center",marginLeft:2}}>
+                    {(i.target==="VUSD") ? (<Image source={require('../../../assets/icons/1x/usd_custom.png')} style={{width:29,height:29}}/>
+                        ):(
+                    <Image source={{uri:i.imgsrc}} style={{width:29,height:29}}/>)}
+                </View>
+                <View style={{marginLeft:10, width:"94.5%",marginRight:5}}>
+                    <Text style={{color:"#FFFFFF",fontWeight:"700"}}>{i.type} {i.quantity} {i.target} {(i.fiat>0) ? "for $":""}{(i.fiat>0) ? (numberWithCommas(dynamicRound(i.fiat,2))):(renderFreeIfZero(i.fiat))}</Text>
+                    <View style={{flexDirection:"row",justifyContent:"space-between"}}>
+                        <Text style={{color:"#FFFFFF"}}>{i.time}</Text>
+                        {(!editStatus || isTablet!==1) && <Text style={[{color:"#FFFFFF"},editStatus && {marginRight:39},(isTablet===1 && !editStatus) && {marginRight:25}]}>1{i.target} = ${numberWithCommas(dynamicRound(i.price,2))}</Text>}
+                    </View>
                 </View>
             </View>
+        </TouchableOpacity>
         )
     }
-    function isCloseToBottom({layoutMeasurement, contentOffset, contentSize}){
-        return layoutMeasurement.height + contentOffset.y >= contentSize.height - 20;
+
+    const alert_delete = (metadata) => {
+        Alert.alert(
+            "Warning",
+            "Are you sure you want to delete this history?",
+            [
+              {
+                text: "Cancel",
+                onPress: () => console.log("Cancel Pressed"),
+                style: "cancel"
+              },
+              { text: "Yes", onPress: () => deleteSingle(metadata)}
+            ]
+          );
+      
     }
-    const handleBottomClose = () => {
-        //setScrolled(true);
-        setlimit(limit + 20);
+    const deleteSelected = () => {
+        return new Promise((res) => {
+            // don't run if there aren't any ids or a path for the collection
+            if (!selected || !selected.length) return res([]);
+        
+            const collectionPath = db
+                                    .collection('users')
+                                    .doc(route.params.email)
+                                    .collection('history');
+            let batches = [];
+        
+            while (selected.length) {
+              // firestore limits batches to 10
+              const batch = selected.splice(0, 10);
+        
+              // add the batch request to to a queue
+              batches.push(
+                new Promise(response => {
+                  collectionPath
+                    .where(
+                      firebase.firestore.FieldPath.documentId(),
+                      'in',
+                      [...batch]
+                    )
+                    .get()
+                    .then((querySnapshot)=>{
+                        var batch = db.batch();
+                        querySnapshot.forEach(function(doc) {
+                            // For each doc, add a delete operation to the batch
+                            batch.delete(doc.ref);
+                            console.log(doc.id," has been deleted !");
+                        });
+                        batch.commit();
+                        response("batch completed");
+                    })
+                })
+              )
+            }
+        
+            // after all of the data is fetched, return it
+            Promise.all(batches).then(() => {
+                res("Successfully deleted all");
+                console.log("Promised all !!");
+                setEditStatus(false);
+                setSelected([]);
+            })
+        
+          })
     }
 
-    const RenderScreen = () => {
-            return (
-                <View>
-                    {history.map((i,index)=>(
-                            <View key={index} style={[{flexDirection:"row",height:50,padding:5,margin:2,alignItems:"center",borderRadius:5},(i.type==="Sold" || i.type === "Spent")?{backgroundColor:sellColor()}:{backgroundColor:buyColor()}]}>
-                                <View style={{position:"absolute",width:34,height:34,borderRadius:8,backgroundColor:"white",marginLeft:8}} />
-                                <Image source={{uri:i.imgsrc}} style={{width:29,height:29,marginLeft:5}}/>
-                                <View style={{marginLeft:10, width:"90%",marginRight:5}}>
-                                    <Text style={{color:textColor(),fontWeight:"700"}}>{i.type} {i.quantity} {i.target} for {(i.fiat>0) ? "$":""}{(i.fiat>0) ? (numberWithCommas(dynamicRound(i.fiat,2))):(renderFreeIfZero(i.fiat))}</Text>
-                                    <View style={{flexDirection:"row",justifyContent:"space-between",marginRight:13}}>
-                                        <Text style={{color:textColor()}}>{i.time}</Text>
-                                        <Text style={{color:textColor()}}>1{i.target} = ${numberWithCommas(dynamicRound(i.price,2))}</Text>
-                                    </View>
-                                </View>
-                            </View>
-                        ))}
-                </View>
-            )
+    const deleteSingle = (metadata) => {
+        db.collection('users').doc(route.params.email)
+        .collection('history').doc(metadata.id)
+        .delete().then(()=>{console.log("succesfully deleted :",metadata.id);console.log("You had traded",id.target);})
+        .catch((err)=>{console.log(err);console.log(metadata);});
+    }
+    const actionText = () => {
+        return (selected.length>0) ? "Delete selected" : "Done";
     }
 
     return(
-        <SafeAreaView style={{flex:1,backgroundColor:bgColor()}}>
-            <TouchableOpacity onPress={()=>navigation.goBack()} style={{marginBottom:15,marginTop:5,marginLeft:5}}>
-                <View style={{flexDirection:"row",alignItems:"center"}}>
-                    <Image source={require("../../../assets/icons/1x/arrow_darkmode_flipped.png")} style={[{width:20,height:20,marginLeft:5},(!bool_isDarkMode())&&{tintColor:"#000000"}]}/>
-                    <Text style={{fontSize:20,fontWeight:"bold",color:textColor(),marginLeft:5}}>History</Text>
-                </View>
-            </TouchableOpacity>
-            <View style={{alignSelf:"center",borderWidth:2,borderRadius:10,borderColor:borderColor(),backgroundColor:containerColor(),width:width, height:screenHeight-dynamicMargin(),marginBottom:2}}>
-                <ScrollView
-                    scrollEventThrottle={4000}
-                    onScroll={({nativeEvent})=>{
-                        //console.log("Trigger Height set to:",nativeEvent.layoutMeasurement.height + nativeEvent.contentOffset.y);
-                        //setTriggerHeight(nativeEvent.layoutMeasurement.height + nativeEvent.contentOffset.y);
-                        if(isCloseToBottom(nativeEvent)){
-                            handleBottomClose();
-                        }
+        <View style={{flex:1,marginTop:15}}>
+            <View style={{width:width, height:screenHeight-dynamicMargin(), alignSelf:"center",borderWidth:2,borderRadius:8,borderColor:borderColor(),backgroundColor:containerColor(),marginBottom:2}}>
+                <FlatList
+                    style={[{borderRadius: 6},(Platform.OS !== 'ios') && {paddingHorizontal:4,paddingVertical:4}]}
+                    data={history}
+                    renderItem={({item})=>{
+                        return(<Item i={item}/>)
                     }}
-                    style={{padding:5}}
-                >
-                    {(history.length===0)?(<InternalLoadingScreen/>):(<RenderScreen/>)}
-                    <View style={{height:10}}/>
-                </ScrollView>
+                    keyExtractor={item => item.id}
+                    onEndReachedThreshold={0.5}
+                    initialNumToRender={10}
+                />
             </View>
             <View style={{alignSelf:"center"}}>
             {!ispro && 
@@ -167,11 +248,12 @@ const HistoryScreen = ({route, navigation}) => {
                 bannerSize="fullBanner"
                 adUnitID={bannerID} // Test ID, Replace with your-admob-unit-id
                 servePersonalizedAds // true or false
-                //onDidFailToReceiveAdWithError={this.bannerError}
+                onDidFailToReceiveAdWithError={adError}
                 />
             }
             </View>
-        </SafeAreaView>
+        {/*<View style={{width:screenWidth,height:100,backgroundColor:"red"}}/>*/}
+    </View>
     )
 }
 

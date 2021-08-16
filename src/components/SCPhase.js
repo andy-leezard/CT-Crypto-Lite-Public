@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, ScrollView } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useColorScheme } from "react-native-appearance";
 import SC from './SC';
 import Env from '../env.json';
@@ -15,13 +14,13 @@ const SCPhase = ({route, navigation}) => {
     }
 
     return (
-        <SafeAreaView style={{flex:1, backgroundColor:bgColor()}}>
+        <View style={{flex:1,backgroundColor:bgColor(),paddingTop:15}}>
             <View style={{paddingHorizontal: 20}}>
                 <ScrollView>
                     <SC crntversion={Env.currentVersion}/>
                 </ScrollView>
             </View>
-        </SafeAreaView>
+        </View>
     )
 }
 
