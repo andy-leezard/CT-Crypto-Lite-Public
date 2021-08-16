@@ -12,7 +12,6 @@ Now supports : 1000+ cryptocurrencies, dark mode on any device, email verificati
 <img src="https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/screenshots%2FiOS%2F1_1242_2688.jpg?alt=media&token=827845a6-03a2-44cc-b466-378ce7a292a6" alt="Screenshot_2" width="259" height="560">
 <img src="https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/screenshots%2FiOS%2F2_1242_2688.jpg?alt=media&token=e13650a4-dfb5-4466-8076-3e8a573e4510" alt="Screenshot_3" width="259" height="560">
 <img src="https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/screenshots%2FiOS%2F3_1242_2688.jpg?alt=media&token=ea3384f3-d158-4407-9517-4c9e69607580" alt="Screenshot_4" width="259" height="560">
-<img src="https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/screenshots%2FiOS%2F3_1242_2688.jpg?alt=media&token=ea3384f3-d158-4407-9517-4c9e69607580" alt="Screenshot_4" width="518" height="560">
 <img src="https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/screenshots%2FiOS%2F4_2048_2732.jpg?alt=media&token=937f8856-8367-4178-9ead-42c7332b4601" alt="Screenshot_5" width="840" height="560">
 </p>
 
