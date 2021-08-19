@@ -2,7 +2,7 @@
 
 CoinTracer is a cross-platform mobile app for crypto trading simulator built on React Native and published on both AppStore and Google Play by Andy Lee in 2021.
 
-Version: 1.0.5 iOS and Android (last updated: August 16 2021)
+Version: 1.0.6 iOS and Android (last updated: August 18 2021)
 
 Now officially supports : 1000+ cryptocurrencies, dark mode on any device including tablets, email verification.
 
@@ -12,11 +12,11 @@ Now officially supports : 1000+ cryptocurrencies, dark mode on any device includ
 <img src="https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/icons%2Ficons8-logo-android-480.png?alt=media&token=d2b8685e-7dc0-43c2-8856-8087b2c2fd52" alt="Android" width="84" height="84">
 </p>
 <p float="left">
-<img src="https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/screenshots%2FiOS%2F4_1242_2688.jpg?alt=media&token=1e42f5f3-3efa-4ab4-9a35-1180843746d7" alt="Screenshot_1" width="259" height="560">
-<img src="https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/screenshots%2FiOS%2F1_1242_2688.jpg?alt=media&token=827845a6-03a2-44cc-b466-378ce7a292a6" alt="Screenshot_2" width="259" height="560">
-<img src="https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/screenshots%2FiOS%2F2_1242_2688.jpg?alt=media&token=e13650a4-dfb5-4466-8076-3e8a573e4510" alt="Screenshot_3" width="259" height="560">
-<img src="https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/screenshots%2FiOS%2F4_2048_2732.jpg?alt=media&token=937f8856-8367-4178-9ead-42c7332b4601" alt="Screenshot_4" width="420" height="560">
-<img src="https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/screenshots%2FiOS%2F3_1242_2688.jpg?alt=media&token=ea3384f3-d158-4407-9517-4c9e69607580" alt="Screenshot_5" width="259" height="560">
+<img src="https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/screenshots%2FiOS%2F4_1242_2208.jpg?alt=media&token=495e72dd-595e-4bc8-b951-13a2940d7cfa" alt="Screenshot_1" width="259" height="560">
+<img src="https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/screenshots%2FiOS%2F1_1242_2688.jpg?alt=media&token=f0229935-6e7d-4c9f-96ed-5634a8c200c2" alt="Screenshot_2" width="259" height="560">
+<img src="https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/screenshots%2FiOS%2F2_1242_2688.jpg?alt=media&token=c3c41db4-a3a5-467e-ad63-05e03c581ef8" alt="Screenshot_3" width="259" height="560">
+<img src="https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/screenshots%2FiOS%2F4_2048_2732.jpg?alt=media&token=c12023ea-830d-48f4-8e44-b47fefdf9c59" alt="Screenshot_4" width="420" height="560">
+<img src="https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/screenshots%2FiOS%2F3_1242_2688.jpg?alt=media&token=4cbdff0c-c434-425b-ba30-26cdf26ccd11" alt="Screenshot_5" width="259" height="560">
 
 </p>
 
@@ -44,8 +44,16 @@ This repository which does not, and will not contain some of its original source
 This app does not operate actual cryptocurrency trading services and is built simply and purely for educational & recreational purposes to help people try out simulated cryptocurrency investment.
 
 # Privacy
-This app stores data that is directly provided by the user in the backend server storage. The user data can be permanently deleted on demand by deleting your account. All deleted user data is irrecoverable.
+To use the Service, you need to create an account. By doing so, you acknowledge that you fully understand and agree with the Terms of use.
+CoinTracer does not knowingly collect any Personal Identifiable Information from anyone.
+This app stores data that is only directly provided by the user. The user data can be permanently deleted on demand by deleting user account. All deleted user data is irrecoverable. You can delete your account at any time.
+Nontheless, it is recommended to use a real email address (which is not a personally identifiable information) in order to receive expected emails such as legal notifications and password reset requests. Any problem caused by disregarding this recommendation will be solely of your responsibility.
+General Data Protection Regulation (GDPR)
+At CoinTracer, one of the main priorities is the privacy of the visitors (users). This Privacy Policy document contains types of information that is collected and recorded by CoinTracer and how it is used.
+If you are a resident of the European Economic Area (EEA), you have certain data protection rights. If you wish to be informed what Personal Information this app holds about you, (which is only your email address and is not personally identifiable) and if you want it to be removed from our systems, you can achieve it by deleting your account as mentioned above.
+Like any other web service and application, CoinTracer uses 'cookies' and log files in order to keep your signin status and limit ads impressions to improve ad experience quality. These are also used to store information including users' preferences and interests for third-party advertisers to by personalize the ads they provide.
+Note that CoinTracer has no access to or control over the cookies that are used by the third-party advertisers. By using the Service that CoinTracer provides, you hereby consent to our Privacy Policy, fully acknowledge that it complies to the GDPR and agree to its terms.
 
 # Images from Android virtual machine
-![Screenshot1](https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/screenshots%2FAndroid%2Fandroid_1024_500.png?alt=media&token=62272944-fffc-49b0-a52b-46e337ffe67e)
-![Screenshot2](https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/screenshots%2FAndroid%2F9_16_4.jpg?alt=media&token=614c5de0-fbda-4527-acda-ef52b9d3a519)
+![Screenshot1](https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/screenshots%2FAndroid%2Fandroid_1024_500.png?alt=media&token=145632cc-2119-42ba-b024-5a88462bc331)
+![Screenshot2](https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/screenshots%2FAndroid%2F9_16_4.jpg?alt=media&token=b38b0b11-0b8b-4b7a-8433-db87170b09ff)
