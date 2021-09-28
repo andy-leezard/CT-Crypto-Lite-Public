@@ -14,11 +14,8 @@ web-build/
 # macOS
 .DS_Store
 
-#firebase
-firebase.*
-
 #App.js
-app.json
+#app.json
 
 #backups
 *.rar

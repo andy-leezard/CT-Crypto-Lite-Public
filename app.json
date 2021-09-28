@@ -1,0 +1,47 @@
+{
+  "expo": {
+    "name": "CoinTracer",
+    "slug": "CoinTracer",
+    "version": "1.1.1",
+    "orientation": "portrait",
+    "icon": "./src/assets/icon.png",
+    "splash": {
+      "image": "./src/assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#000000"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "bundleIdentifier": "com.iOSbundleIdentifier",
+      "buildNumber": "1.0.0",
+      "supportsTablet": true,
+      "userInterfaceStyle": "automatic",
+      "config" : {
+        "googleMobileAdsAppId":"ca-app-pub-xxxxxxxxxxxxxxxx~xxxxxxxxxx"
+      },
+      "appStoreUrl": "https://apps.apple.com/us/app/apple-store/id1579682178"
+    },
+    "android": {
+      "package": "com.package",
+      "userInterfaceStyle": "automatic",
+      "versionCode": 20,
+      "adaptiveIcon": {
+        "foregroundImage": "./src/assets/adaptive-icon.png",
+        "backgroundColor": "#000000"
+      },
+      "config": {
+        "googleMobileAdsAppId": "ca-app-pub-xxxxxxxxxxxxxxxx~xxxxxxxxxx"
+      },
+      "permissions" : [],
+      "playStoreUrl": "https://play.google.com/store/apps/details?id=com.AndyLeeDev.CoinTracer"
+    },
+    "web": {
+      "favicon": "./src/assets/favicon.png"
+    }
+  }
+}

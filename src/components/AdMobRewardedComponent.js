@@ -1,24 +1,19 @@
 import React, { Component } from "react";
-import { TouchableOpacity, Text, Platform, Alert } from 'react-native';
+import { TouchableOpacity, Text, Platform, Image } from 'react-native';
 import { AdMobRewarded } from 'expo-ads-admob';
 import { db } from '../../firebase';
 import AwesomeAlert from 'react-native-awesome-alerts';
 import Env from '../env.json';
+import I18n from "i18n-js";
 
-const android_rewarded_test = "ca-app-pub-3940256099942544/5224354917";
-const ios_rewarded_test = "ca-app-pub-3940256099942544/1712485313";
-
-const android_rewarded = "ca-app-pub-xxxxxxxxxxxxxxxxxx/xxxxxxxxxx";
-const ios_rewarded = "ca-app-pub-xxxxxxxxxxxxxxxxxx/xxxxxxxxxx";
-
-const bool_AD_is_test = (Env.Test_ads ?? "false") === "true" ? true:false;
-
+// JS-only component : preference
 export default class AdMobRewardedComponent extends Component {
     state = {
         rewarded: false,
         loadedAd: false,
         showAlert: false,
         showAlert_skip: false,
+        showAlert_noad: false,
         error: false,
         reward_1: 0,
         reward_2: 0,
@@ -29,68 +24,68 @@ export default class AdMobRewardedComponent extends Component {
     }
 
     async componentDidMount() {
-        let ad_controller = await db.collection('globalEnv').doc('ad_controller').get();
-        let ad_config = ad_controller.data();
-        let override = ad_config.always_test ?? false;
+        const ad_controller = db.collection('globalEnv').doc('ad_controller');
+        const _ad_controller = await ad_controller.get();
+        const ad_config = _ad_controller.data();
+        const override = ad_config.always_test ?? false;
         this.setState({
-            reward_1: ad_config.video_reward_1 ?? 9999, // real value hidden for security reasons
-            reward_2: ad_config.video_reward_2 ?? 9999, // real value hidden for security reasons
-            reward_7: ad_config.video_reward_7 ?? 9999, // real value hidden for security reasons
-            reward_20: ad_config.video_reward_20 ?? 9999, // real value hidden for security reasons
-            reward_70: ad_config.video_reward_70 ?? 9999 // real value hidden for security reasons
+            reward_1: ad_config.video_reward_1 ?? 750,
+            reward_2: ad_config.video_reward_2 ?? 500,
+            reward_7: ad_config.video_reward_7 ?? 350,
+            reward_20: ad_config.video_reward_20 ?? 250,
+            reward_70: ad_config.video_reward_70 ?? 100
         });
-        if(bool_AD_is_test || override){
-            AdMobRewarded.setAdUnitID((Platform.OS === 'ios') ? ios_rewarded_test:android_rewarded_test);
+        if(Env.Test_ads || override){
+            AdMobRewarded.setAdUnitID((Platform.OS === 'ios') ? Env.ios_rewarded_test:Env.android_rewarded_test);
         }else{
-            AdMobRewarded.setAdUnitID((Platform.OS === 'ios') ? ios_rewarded:android_rewarded);
+            AdMobRewarded.setAdUnitID((Platform.OS === 'ios') ? Env.ios_rewarded:Env.android_rewarded);
         }
         AdMobRewarded.addEventListener('rewardedVideoUserDidEarnReward', () => {
             console.log('User Did Earn Reward');
             this.setState({ rewarded: true });
             this.giveReward();
         });
-        AdMobRewarded.addEventListener('rewardedVideoDidLoad', () => {console.log('VideoLoaded with test status : ',(bool_AD_is_test || override));this.setState({ loadedAd: true });});
-        AdMobRewarded.addEventListener('rewardedVideoDidFailToLoad', (e) => {console.log('FailedToLoad :',e.error);this.setState({ error: true });});
-        AdMobRewarded.addEventListener('rewardedVideoDidPresent', () => console.log('Did Present'));
-        AdMobRewarded.addEventListener('rewardedVideoDidFailToPresent', () => console.log('Failed To Present'));
+        AdMobRewarded.addEventListener('rewardedVideoDidLoad', () => {console.log('VideoLoaded with test status : ',(Env.Test_ads || override));this.setState({ loadedAd: true });});
+        AdMobRewarded.addEventListener('rewardedVideoDidFailToLoad', (e) => {
+            this.setState({ error: true });
+            this.reportError(e);
+        });
         AdMobRewarded.addEventListener('rewardedVideoDidDismiss', () => {
-            console.log('Video Did Dismiss');
             console.log("This.rewarded is :",this.state.rewarded);
-            if(!this.state.rewarded){
-                this.showAlert_skip();
-            }
-            AdMobRewarded.requestAdAsync()
-                .then(()=>{
-                    this.setState({ loadedAd: true, rewarded: false });
-                })
-                .catch(error => {
-                    (error.message === "Ad is already loaded.") && this.setState({ loadedAd: true });
-                    console.warn(error.message);
-            });
+            (!this.state.rewarded) && this.showAlert_skip();
+            this.requestAd(false);
         });
+        this.requestAd(true);
+    }
 
-        await AdMobRewarded.requestAdAsync().catch(error => {
-            (error.message === "Ad is already loaded.") && this.setState({ loadedAd: true });
-            console.warn(error.message);
-        });
+    reportError = async(e) => {
+        const msg = e.name ?? e;
+        const reporter = this.props.user ?? "anonymous";
+        const timestamp = new Date().toUTCString();
+        await ad_controller.collection('logs').add({type:"Video",error:msg,timestamp:timestamp,reporter:reporter});
     }
 
     componentWillUnmount() {
-        console.log("componentWillUnmount");
         AdMobRewarded.removeAllListeners();
     }
 
     _handlePress = () => {
-        const { error } = this.state;
-        if(!error){
+        if(this.state.error){
+            this.showAlert_noad();
+        }else if(this.state.loadedAd){
             this.showAd();
-        }else{
-            Alert.alert(
-            "Reward unavailable",
-            `No reward available at the moment. Please come back later.`,
-            [{ text: "OK" },]
-            );
         }
+    }
+
+    requestAd = (firstTime) => {
+        AdMobRewarded.requestAdAsync()
+            .then(()=>{
+                !firstTime && this.setState({ loadedAd: true, rewarded: false });
+            })
+            .catch(error => {
+                (error.code === "E_AD_ALREADY_LOADED") && this.setState({ loadedAd: true });
+                console.log(error.message);
+            });
     }
 
     showAd = async() => {
@@ -122,6 +117,18 @@ export default class AdMobRewardedComponent extends Component {
         });
     };
 
+    showAlert_noad = () => {
+        this.setState({
+          showAlert_noad: true
+        });
+    };
+
+    hideAlert_noad = () => {
+        this.setState({
+            showAlert_noad: false
+        });
+    };
+
     giveReward = async() => {
         const { reward_1, reward_2, reward_7, reward_20, reward_70 } = this.state;
         const dynamicRound = (i,j) => {
@@ -129,7 +136,7 @@ export default class AdMobRewardedComponent extends Component {
         }
         const getReward = () => {
             const rndInt = Math.random();
-            let bonus = Math.floor((Math.random()*9999)+9999) // real value hidden for security reasons
+            let bonus = Math.floor((Math.random()*50)+1)
             if(rndInt<=0.01){
                 return reward_1;
             }else if(rndInt<=0.02){
@@ -151,14 +158,16 @@ export default class AdMobRewardedComponent extends Component {
         let theseed = data.seed;
         let thetotalbuyin = data.totalbuyin;
         let thetotalbuyin_const = data.totalbuyin_constant;
+        let reward_acc = data.reward_acc ?? 0;
         let newSeed = dynamicRound(theseed + reward,2);
         let newThetotalbuyin = dynamicRound(thetotalbuyin + reward,2);
         let newThetotalbuyin_const = dynamicRound(thetotalbuyin_const + reward,2);
+        let newReward_acc = dynamicRound(reward_acc + reward,2);
         let j = new Date().toString();
         let k = j.split(" ");
         let l = k.slice(1, 5);
         l[3] = l[3].substring(0,5);
-        dir.update({seed:newSeed, totalbuyin:newThetotalbuyin, totalbuyin_constant:newThetotalbuyin_const}).then(()=>{
+        dir.update({seed:newSeed, totalbuyin:newThetotalbuyin, totalbuyin_constant:newThetotalbuyin_const, reward_acc:newReward_acc}).then(()=>{
             dir
             .collection("history")
             .add({
@@ -172,15 +181,15 @@ export default class AdMobRewardedComponent extends Component {
                 orderNum: Number(new Date().getTime()).toString().substring(0, 10),
                 time: l.join(' ')
              })
-            console.log("User gained [",reward,"] VUSD with the rewarded video ad.");
+            console.log("User has earned [",reward,"] VUSD with the rewarded video ad.");
             this.showAlert();
         }).catch((e)=>{
-            console.log("Error - User did not gain reward because :",e);
+            console.log("Error - User did not earn the reward because :",e);
         });
     }
 
     render() {
-        const { loadedAd, showAlert, showAlert_skip, error, message_reward } = this.state;
+        const { loadedAd, showAlert, showAlert_skip, error, message_reward, showAlert_noad } = this.state;
         const dynamicColor = () => {
             return loadedAd ? "#2394DB":"#a3a3a3";
         }
@@ -189,20 +198,22 @@ export default class AdMobRewardedComponent extends Component {
         }
         return (
             <>
-            <TouchableOpacity onPress={this._handlePress} disabled={!loadedAd} 
-            style={{width:this.props.width,marginBottom:5,height:35,borderRadius:5,backgroundColor:dynamicColor(),justifyContent:"center",alignItems:"center"}}>
-                <Text style={{fontSize:16, fontWeight:"700", color:dynamicTextColor()}}>{error ? "reward unavailable":"Get random VUSD reward"}</Text>
+            <TouchableOpacity onPress={this._handlePress}
+            style={{flexDirection:"row",width:this.props.width,marginBottom:5,height:this.props.height??35,borderRadius:this.props.borderRadius??5,backgroundColor:dynamicColor(),justifyContent:"center",alignItems:"center",flexDirection:"row"}}>
+                {!error && this.props.show_text && <Text style={{fontSize:this.props.textSize ?? 17, fontWeight:"700", color:dynamicTextColor()}}>{I18n.t('random_reward_pre') + " " + I18n.t('random_reward_suf')}</Text>}
+                {error && <Text style={{fontSize:17, fontWeight:"700", color:dynamicTextColor()}}>{I18n.t('reward_er1')}</Text>}
+                {!error && <Image source={require('../assets/icons/1x/gift3.png')} style={{width:this.props.height?this.props.height-10:26,height:this.props.height?this.props.height-10:26,marginLeft:5}}/>}
             </TouchableOpacity>
             <AwesomeAlert
                 show={showAlert}
                 showProgress={false}
-                title="VUSD Reward"
-                message={`You earned ${message_reward} VUSD!`}
+                title={I18n.t('random_reward_pre')+" "+I18n.t('random_reward_suf')}
+                message={`${I18n.t('you_earned_pre')} ${message_reward} ${I18n.t('you_earned_suf')}`}
                 closeOnTouchOutside={true}
                 closeOnHardwareBackPress={true}
                 showCancelButton={false}
                 showConfirmButton={true}
-                confirmText=" Cool! "
+                confirmText={` ${I18n.t('cool')} `}
                 confirmButtonColor="#55ddab"
                 onDismiss={()=>{
                     this.hideAlert();
@@ -214,19 +225,37 @@ export default class AdMobRewardedComponent extends Component {
             <AwesomeAlert
                 show={showAlert_skip}
                 showProgress={false}
-                title="Error"
-                message="You skipped the reward"
+                title={I18n.t('error')}
+                message={I18n.t('reward_er2_msg')}
                 closeOnTouchOutside={true}
                 closeOnHardwareBackPress={true}
                 showCancelButton={false}
                 showConfirmButton={true}
-                confirmText=" Retry "
+                confirmText={` ${I18n.t('retry')} `}
                 confirmButtonColor="#DD6B55"
                 onDismiss={()=>{
                     this.hideAlert_skip();
                 }}
                 onConfirmPressed={() => {
                     this.hideAlert_skip();
+                }}
+            />
+            <AwesomeAlert
+                show={showAlert_noad}
+                showProgress={false}
+                title={I18n.t('reward_er1_alert')}
+                message={I18n.t('reward_er1_msg')}
+                closeOnTouchOutside={true}
+                closeOnHardwareBackPress={true}
+                showCancelButton={false}
+                showConfirmButton={true}
+                confirmText={` ${I18n.t('ok')} `}
+                confirmButtonColor="#DD6B55"
+                onDismiss={()=>{
+                    this.hideAlert_noad();
+                }}
+                onConfirmPressed={() => {
+                    this.hideAlert_noad();
                 }}
             />
             </>

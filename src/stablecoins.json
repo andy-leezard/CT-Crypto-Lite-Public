@@ -1,56 +1,74 @@
 [
     {
-      "name": "Tether"
+      "name": "Tether",
+      "symbol": "usdt"
     },
     {
-      "name": "USD Coin"
+      "name": "USD Coin",
+      "symbol": "usdc"
     },
     {
-      "name": "Binance USD"
+      "name": "Binance USD",
+      "symbol": "busd"
     },
     {
-      "name": "Dai"
+      "name": "Dai",
+      "symbol": "dai"
     },
     {
-      "name": "TerraUSD"
+      "name": "TerraUSD",
+      "symbol": "ust"
     },
     {
-      "name": "Liquidity USD"
+      "name": "Liquidity USD",
+      "symbol": "lusd"
     },
     {
-      "name": "HUSD"
+      "name": "HUSD",
+      "symbol": "husd"
     },
     {
-      "name": "TrueUSD"
+      "name": "TrueUSD",
+      "symbol": "tusd"
     },
     {
-      "name": "Paxos Standard"
+      "name": "Paxos Standard",
+      "symbol": "pax"
     },
     {
-      "name": "Neutrino USD"
+      "name": "Neutrino USD",
+      "symbol": "usdn"
     },
     {
-      "name": "Fei Protocol"
+      "name": "Fei Protocol",
+      "symbol": "fei"
     },
     {
-      "name": "Gemini Dollar"
+      "name": "Gemini Dollar",
+      "symbol": "gusd"
     },
     {
-      "name": "Frax"
+      "name": "Frax",
+      "symbol": "frax"
     },
     {
-      "name": "sUSD"
+      "name": "sUSD",
+      "symbol": "susd"
     },
     {
-      "name": "Alchemix USD"
+      "name": "Alchemix USD",
+      "symbol": "alusd"
     },
     {
-      "name": "USDP"
+      "name": "USDP",
+      "symbol": "usdp"
     },
     {
-      "name": "mStable USD"
+      "name": "mStable USD",
+      "symbol": "musd"
     },
     {
-      "name": "Wault USD"
+      "name": "Wault USD",
+      "symbol": "wusd"
     }
 ]

@@ -1,6 +1,7 @@
 import React from 'react'
 import { Image } from 'react-native'
 
+// JS-only component : module is a function component with no dependancy
 const Favorite_icon = ({w,h}) => {
     return (
         <Image

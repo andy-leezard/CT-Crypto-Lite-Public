@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
-import { Animated, View, Image } from 'react-native'
+import { Animated, View } from 'react-native'
 
+// JS-only component : module is a class component with no dependancy
 export default class Loading extends Component {
     constructor(props){
         super(props)
@@ -27,7 +28,7 @@ export default class Loading extends Component {
         return (
             <View>
                 <Animated.Image
-                    style={{width:this.props.width,height:this.props.height,transform:[{rotate:RotateData}]}}
+                    style={{width:this.props.width,height:this.props.height,transform:[{rotate:RotateData}],tintColor:"#1DC08B"}}
                     source={require('../assets/icons/1x/loading.png')}
                     tintColor="#1DC08B"
                 />
