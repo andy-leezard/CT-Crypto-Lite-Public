@@ -13,23 +13,18 @@ import LanguageChanger from '../../../components/LanguageChanger';
 import i18n from 'i18n-js';
 import { GlobalContext } from '../../../StateManager';
 import { GlobalContextInterfaceAsReducer } from '../../../lib/Types';
+import { textColor } from '../../../lib/StyleLib';
 
 const Stack = createStackNavigator();
-
-const globalScreenOptions_dark ={
-    headerTitleStyle: {color:"#FFFFFF"},
-    headerTintColor: "#FFFFFF"
-}
-const globalScreenOptions_light ={
-    headerTitleStyle: {color:"#000000"},
-    headerTintColor: "#000000"
-}
 
 const PricesScreen:React.FC = () => {
     const globalContext = useContext<GlobalContextInterfaceAsReducer>(GlobalContext);
 
     return (
-        <Stack.Navigator initialRouteName="Stack_Settings" screenOptions={globalContext.state.env.darkmode ? globalScreenOptions_dark : globalScreenOptions_light}>
+        <Stack.Navigator initialRouteName="Stack_Settings" screenOptions={{
+            headerTitleStyle: {color:textColor(globalContext.state.env.darkmode!)},
+            headerTintColor: textColor(globalContext.state.env.darkmode!)
+        }}>
             <Stack.Screen name='Stack_Settings' options={{title:i18n.t('settings')}} component={Settings}/>
             <Stack.Screen name='Stack_Settings_TNC' options={{title:i18n.t('d_tnc')}} component={TNCPhase}/>
             <Stack.Screen name='Stack_Settings_FAQ' options={{title:i18n.t('faq')}} component={FAQ}/>

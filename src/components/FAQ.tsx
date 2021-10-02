@@ -35,7 +35,7 @@ const FAQ:React.FC<Props> = ({route, navigation}) => {
     },[]);
 
     return(
-        <View style={{alignItems:"center",height:globalContext.state.env.screenHeight-dynamic_bottom_tab_Height(mainContext.adblock)}}>
+        <View style={{alignItems:"center",height:globalContext.state.env.screenHeight-dynamic_bottom_tab_Height(Boolean(mainContext.user.adblock || mainContext.adEnv.globalAdBlock))}}>
             <View style={{flex:1,width: globalContext.state.env.screenWidth,marginTop:15,paddingHorizontal:10}}>
                 <ScrollView style={{borderRadius:10, backgroundColor:containerColor(globalContext.state.env.darkmode!),paddingHorizontal:10,paddingVertical:5}}>
                     <Text style={{color:textColor(globalContext.state.env.darkmode!),fontSize:20,fontWeight:"700",marginBottom:5}}>{I18n.t('p_faq.q1')}</Text>

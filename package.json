@@ -10,8 +10,8 @@
   "dependencies": {
     "@react-native-async-storage/async-storage": "~1.15.0",
     "@react-native-community/picker": "^1.8.1",
-    "@react-native-community/slider": "^4.1.7",
-    "@react-native-picker/picker": "^2.1.0",
+    "@react-native-community/slider": "3.0.3",
+    "@react-native-picker/picker": "1.16.1",
     "@react-navigation/bottom-tabs": "^6.0.5",
     "@react-navigation/native": "^6.0.2",
     "@react-navigation/stack": "^6.0.7",
@@ -19,6 +19,7 @@
     "axios": "^0.21.4",
     "expo": "~42.0.1",
     "expo-ads-admob": "~10.1.2",
+    "expo-clipboard": "~1.1.0",
     "expo-device": "~3.3.0",
     "expo-linking": "~2.3.1",
     "expo-localization": "~10.2.0",
@@ -37,12 +38,12 @@
     "react-native-gesture-handler": "~1.10.2",
     "react-native-modal": "^13.0.0",
     "react-native-picker-module": "^2.0.4",
-    "react-native-svg": "^12.1.1",
+    "react-native-svg": "12.1.1",
     "react-native-web": "~0.13.12",
     "rn-swipeable-panel": "^1.2.6"
   },
   "devDependencies": {
-    "@babel/core": "^7.9.0",
+    "@babel/core": "~7.9.0",
     "@types/react": "~16.9.35",
     "@types/react-native": "~0.63.2",
     "typescript": "~4.0.0"

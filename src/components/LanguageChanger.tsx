@@ -87,7 +87,7 @@ const LanguageChanger:React.FC<Props> = ({route,navigation}) => {
     }
 
     return(
-        <View style={{alignItems:"center",marginTop:15,height:globalContext.state.env.screenHeight-dynamic_bottom_tab_Height(mainContext.adblock)-15}}>
+        <View style={{alignItems:"center",paddingTop:15,height:globalContext.state.env.screenHeight-dynamic_bottom_tab_Height(Boolean(mainContext.user.adblock || mainContext.adEnv.globalAdBlock))}}>
             <View style={{flex:1}}>
                 <ScrollView style={{width: globalContext.state.env.screenWidth}}>
                     <View style={{width: globalContext.state.env.screenWidth-40, alignSelf:"center", height:"auto", padding:5, borderRadius:10, backgroundColor:containerColor_bis(globalContext.state.env.darkmode!),marginVertical:5}}>

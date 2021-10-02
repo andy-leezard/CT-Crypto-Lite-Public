@@ -125,7 +125,7 @@ const GlobalDetails:React.FC<Props> = ({route,navigation}) => {
 
     return (
         <>
-        <View style={{backgroundColor:StyleLib.bgColor(globalContext.state.env.darkmode!),height:globalContext.state.env.screenHeight-StyleLib.dynamic_bottom_tab_Height(mainContext.adblock)}}>
+        <View style={{backgroundColor:StyleLib.bgColor(globalContext.state.env.darkmode!),height:globalContext.state.env.screenHeight-StyleLib.dynamic_bottom_tab_Height(mainContext.user.adblock)}}>
             <View style={{width:globalContext.state.env.screenWidth-20, borderRadius:10, borderWidth:3, borderColor:StyleLib.containerRadiusColor_bis(globalContext.state.env.darkmode!), padding:10,marginVertical:10,alignSelf:"center"}}>
                 <View style={{alignSelf:"center"}}>
                     <Text style={{color:StyleLib.textColor(globalContext.state.env.darkmode!),fontSize:16,marginBottom:10,fontWeight:"bold",marginLeft:10}}>{i18n.t('m_cap_by_per')}</Text>
@@ -145,7 +145,7 @@ const GlobalDetails:React.FC<Props> = ({route,navigation}) => {
                     />
                 </View>
             </View>
-            <View style={{flex:1,width:globalContext.state.env.screenWidth-20,marginTop:1,marginBottom:1,alignSelf:"center",backgroundColor:StyleLib.containerColor_bis(globalContext.state.env.darkmode!),borderRadius:10}}>
+            <View style={{flex:1,width:globalContext.state.env.screenWidth-20,marginBottom:5,alignSelf:"center",backgroundColor:StyleLib.containerColor_bis(globalContext.state.env.darkmode!),borderRadius:10}}>
                 <ScrollView>
                     <View style={{alignItems:"center",justifyContent:"center"}}>
                         {allData.map((i:Coin, index:number)=>{
@@ -180,7 +180,11 @@ const GlobalDetails:React.FC<Props> = ({route,navigation}) => {
             <SwipeablePanel
             {...panelProps}
                 isActive={isPanelActive}
-                style={{backgroundColor:StyleLib.containerColor_bis(globalContext.state.env.darkmode!),bottom:-100,paddingBottom:mainContext.adblock ? 100:160}}
+                style={{
+                    backgroundColor:StyleLib.containerColor_bis(globalContext.state.env.darkmode!),
+                    bottom:-100,
+                    paddingBottom:Boolean(mainContext.user.adblock || mainContext.adEnv.globalAdBlock) ? 100:160
+                }}
                 closeOnTouchOutside={true}
                 showCloseButton={false}
                 onlyLarge={true}

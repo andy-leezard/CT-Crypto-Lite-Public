@@ -178,7 +178,7 @@ const sliceColor = ['#3684CB','#3FB2AB','#6CD293', '#C7F5D6', '#CBD5E0', '#FFFFF
 
 export const post_to_portfolio = (mainContext:MainContextInterface,darkmode:boolean):Obj => {
     const pieSeries = [];const completeData:CT_Wallet[] = [];let desc = [];const delistedData:CT_Wallet[] = [];let delisted_desc = [];//const chartkeys = [];
-    let thesum = mainContext.seed;
+    let thesum = mainContext.user.seed;
     mainContext.postdata.forEach((i) => {
         let onceonly = mainContext.coindata.filter(j => i.id === j.name);
         if(onceonly.length>0){
@@ -201,7 +201,7 @@ export const post_to_portfolio = (mainContext:MainContextInterface,darkmode:bool
             console.log("warning - coin [",i.id,"] has been delisted !");
         }
     })
-    completeData.push({id:"VUSD",symbol:"VUSD",name:"VUSD",appre:mainContext.seed,appreciation:mainContext.seed,avg_price:1,img:Env.fiatCoinIcon,crntPrice:1,rank:9999,url:'usdt',quantity:mainContext.seed});
+    completeData.push({id:"VUSD",symbol:"VUSD",name:"VUSD",appre:mainContext.user.seed,appreciation:mainContext.user.seed,avg_price:1,img:Env.fiatCoinIcon,crntPrice:1,rank:9999,url:'usdt',quantity:mainContext.user.seed});
     delisted_desc = delistedData.sort((a, b) => b.quantity - a.quantity);
     desc = completeData.sort((a, b) => b.appreciation! - a.appreciation!);
     let t = 5; let etcsum = 0;
@@ -234,8 +234,8 @@ export const post_to_portfolio = (mainContext:MainContextInterface,darkmode:bool
         });
     })
     const total = dynamicRound(thesum,2);
-    const normalpnl = returnPNL(total,mainContext.totalbuyin);
-    const constpnl = returnPNL(total,mainContext.totalbuyin_const);
+    const normalpnl = returnPNL(total,mainContext.user.totalbuyin);
+    const constpnl = returnPNL(total,mainContext.user.totalbuyin_const);
     const obj:Obj = {"piedata":pieSeries,"associatedData":asso,
     "totalAppreciation":total,"pnl":normalpnl,"pnl_const":constpnl,"delisted":delisted_desc};
     console.log("updated portfolio");

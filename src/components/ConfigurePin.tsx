@@ -58,7 +58,15 @@ const ConfigurePin:React.FC<Props> = ({route, navigation}) => {
                 {redoInfo && <View style={{backgroundColor:"rgba(0,0,0,0.5)",borderWidth:1,borderColor:"#FDD7D8",borderRadius:10,padding:5,width:screenWidth-40,alignSelf:"center",marginBottom:10}}>
                     <Text style={{color:"#ffffff",fontSize:15,fontWeight:"700"}}>{msg_error}</Text>
                 </View>}
-                <TextInput style={[styles.input,{backgroundColor:containerColor(globalContext.state.env.darkmode!),borderColor:containerRadiusColor(globalContext.state.env.darkmode!),color:textColor(globalContext.state.env.darkmode!)}]} value={newpin} onChangeText={setnewpin} keyboardType="numeric" maxLength = {8} onSubmitEditing={confirmPin}/>
+                <TextInput
+                    style={[styles.input,{backgroundColor:containerColor(globalContext.state.env.darkmode!),borderColor:containerRadiusColor(globalContext.state.env.darkmode!),color:textColor(globalContext.state.env.darkmode!)}]}
+                    value={newpin}
+                    onChangeText={setnewpin}
+                    keyboardType="numeric"
+                    maxLength={8}
+                    onSubmitEditing={confirmPin}
+                    autoFocus={true}
+                />
                 <TouchableOpacity style={{alignSelf:"center", height: 45, width: Dimensions.get("window").width-40,justifyContent:"center", alignItems:"center",backgroundColor:"#73A1FF",borderRadius:10}} onPress={()=>confirmPin()}>
                     <Text style={{fontSize:17,color:"white",fontWeight:"bold"}}>{I18n.t('confirm')}</Text>
                 </TouchableOpacity>

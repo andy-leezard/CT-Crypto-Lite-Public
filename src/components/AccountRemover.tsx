@@ -66,7 +66,7 @@ const AccountRemover:React.FC<Props> = ({route, navigation}) => {
                 secureTextEntry={true}
                 style={{backgroundColor: containerColor(globalContext.state.env.darkmode!),borderWidth:1,borderColor:containerRadiusColor(globalContext.state.env.darkmode!),borderRadius: 5,color:"#ffffff",height: 35,width:Dimensions.get("window").width-40,marginHorizontal:14,fontSize:15,marginBottom:10,paddingHorizontal:5}}
                 value={pw} onChangeText={setpw} maxLength = {48}
-                onSubmitEditing={deleteUser}
+                onSubmitEditing={deleteUser} autoFocus={true}
             />)}
             <TouchableOpacity disabled={processing} style={{height: 45,width:Dimensions.get("window").width-40,borderRadius: 10,backgroundColor:"#FF72CF",justifyContent:"center"}} onPress={requestConfirm}>
                 <Text style={styles.appButtonText}>{processing ? i18n.t('processing'):i18n.t('delete_acc')}</Text>

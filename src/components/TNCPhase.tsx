@@ -16,7 +16,7 @@ const TNCPhase:React.FC<Props> = ({route, navigation}) => {
     const mainContext = useContext<MainContextInterface>(MainContext);
 
     return (
-        <View style={{paddingHorizontal: 20, marginTop:15, height:globalContext.state.env.screenHeight-dynamic_bottom_tab_Height(mainContext.adblock)-15}}>
+        <View style={{paddingHorizontal: 20, paddingTop:15, height:globalContext.state.env.screenHeight-dynamic_bottom_tab_Height(Boolean(mainContext.user.adblock || mainContext.adEnv.globalAdBlock))-15}}>
             <TouchableOpacity onPress={()=>navigation.navigate("Stack_Settings_AR")}>
                 <View style={{flexDirection:"row",alignItems:"center",justifyContent:"space-between",marginBottom:15}}>
                     <Text style={{flexWrap:"wrap",fontSize:18,fontWeight:"bold",letterSpacing:0.5,color:textColor(globalContext.state.env.darkmode!)}}>{I18n.t('delete_acc')}</Text>

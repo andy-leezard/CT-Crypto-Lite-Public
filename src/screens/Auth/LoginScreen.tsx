@@ -39,14 +39,21 @@ const LoginScreen:React.FC<Props> = ({ navigation }) => {
     const handleError = (e:any) => {
         const errorCode = e.code;
         console.log(errorCode);
-        if(errorCode == "auth/invalid-email"){
-            displayError(i18n.t('case1'));
-        }else if(errorCode == "auth/wrong-password"){
-            displayError(i18n.t('case2'));
-        }else if(errorCode == "auth/user-not-found"){
-            displayError(i18n.t('case3'));
-        }else{
-            displayError(e.message);
+        switch(errorCode){
+            case("auth/invalid-email"):
+                displayError(i18n.t('case1'));
+                break;
+            case("auth/wrong-password"):
+                displayError(i18n.t('case2'));
+                break;
+            case("auth/user-not-found"):
+                displayError(i18n.t('case3'));
+                break;
+            case("auth/too-many-requests"):
+                displayError(i18n.t('case4'));
+                break;
+            default:
+                displayError(i18n.t('p_upgrade.er_1'));
         }
     }
 

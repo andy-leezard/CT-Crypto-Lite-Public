@@ -1,12 +1,10 @@
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, ImageBackground, TouchableOpacity } from 'react-native';
 import { Button, Image } from 'react-native-elements';
 import { db, auth } from '../../../firebase';
 import Env from '../../env.json';
 import i18n from 'i18n-js';
 import { brandColor } from '../../lib/StyleLib';
-import { GlobalContext } from '../../StateManager';
-import { GlobalContextInterfaceAsReducer } from '../../lib/Types';
 import { isValidEmailAddress } from '../../lib/FuncLib';
 
 interface Props{
@@ -14,7 +12,6 @@ interface Props{
 }
 
 const RegisterScreen:React.FC<Props> = ({ navigation }) => {
-    const globalContext = useContext<GlobalContextInterfaceAsReducer>(GlobalContext);
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [redoInfo, setRedoInfo] = useState<boolean>(false);
@@ -36,28 +33,32 @@ const RegisterScreen:React.FC<Props> = ({ navigation }) => {
     const togglePW = ():void => {
         setHidePw(!hidepw);
     }
-    const handleError = (e:any):void => {
-        setRedoInfo(true);//console.log(e);
+    const handleError = (e:any) => {
+        setRedoInfo(true);
         const errorCode = e.code;
-        if(errorCode == 'auth/email-already-in-use'){
-            setmsg_error(i18n.t('regi_er1'));
-        }else if(errorCode == 'auth/invalid-email'){
-            setmsg_error(i18n.t('regi_er2'));
-        }else if(errorCode == 'auth/weak-password'){
-            setmsg_error(i18n.t('regi_er3'));
-        }else{
-            if(e.message){
-                setmsg_error(e.message);
-            }else{
-                setmsg_error(JSON.stringify(e));
-            }
+        console.log(errorCode);
+        switch(errorCode){
+            case('auth/email-already-in-use'):
+                setmsg_error(i18n.t('regi_er1'));
+                break;
+            case('auth/invalid-email'):
+                setmsg_error(i18n.t('regi_er2'));
+                break;
+            case('auth/weak-password'):
+                setmsg_error(i18n.t('regi_er3'));
+                break;
+            case("auth/too-many-requests"):
+                setmsg_error(i18n.t('case4'));
+                break;
+            default:
+                setmsg_error(i18n.t('p_upgrade.er_1'));
         }
     }
     const createUser = (loweremail:string):void => {
         auth.createUserWithEmailAndPassword(loweremail,password)
             .then((authUser) => {
                 db.collection('users').doc(loweremail).set({username: username,})
-                authUser.user && authUser.user.sendEmailVerification();
+                authUser.user && authUser.user.sendEmailVerification().catch(console.log);
             })
             .catch(handleError)
             .finally(()=>{
@@ -74,7 +75,7 @@ const RegisterScreen:React.FC<Props> = ({ navigation }) => {
                     style={{width:40,height:40,marginBottom:5,marginTop:80,}}
                     />
                 </View>
-                <Text style={{color:"#FFFFFF",fontSize:24,fontWeight:"bold",textShadowColor:brandColor(globalContext.state.env.darkmode!),textShadowOffset:{width: 1, height: 1},textShadowRadius:4}}>{i18n.t("title_register")}</Text>
+                <Text style={{color:"#FFFFFF",fontSize:24,fontWeight:"bold",textShadowColor:brandColor(false),textShadowOffset:{width: 1, height: 1},textShadowRadius:4}}>{i18n.t("title_register")}</Text>
                 <View style={{width:300, alignItems:"center",marginTop:40}}>
                     {redoInfo && (<View style={{backgroundColor:"rgba(0,0,0,0.5)",borderWidth:1,borderColor:"#FDD7D8",borderRadius:5,padding:5}}>
                         <Text style={{color:"#ffffff",fontSize:15,fontWeight:"700"}}>{msg_error}</Text>

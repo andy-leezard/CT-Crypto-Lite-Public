@@ -8,6 +8,7 @@ import { GlobalContext, MainContext } from '../StateManager';
 import { GlobalContextInterfaceAsReducer, MainContextInterface } from '../lib/Types';
 import { DocumentSnapshot } from '@firebase/firestore-types'
 import { dynamicRound } from '../lib/FuncLib';
+import { containerColor, textColor } from '../lib/StyleLib';
 
 interface Props{
     route:any
@@ -44,7 +45,7 @@ const AdRemover:React.FC<Props> = ({route, navigation}) => {
     const ref = db.collection('users').doc(globalContext.state.auth.userEmail!);
     useEffect(() => {
         initializeAlert();
-        if(mainContext.vip){
+        if(mainContext.user.vip){
             navigation.goBack();
         }else{
             db.collection('globalEnv').doc("commission").get()
@@ -67,13 +68,7 @@ const AdRemover:React.FC<Props> = ({route, navigation}) => {
         })
         return unsubscribe;
     },[]);
-
-    const containerColor = () => {
-        return globalContext.state.env.darkmode ? "#2e2e2e":"#e8e8e8";
-    }
-    const textColor = () => {
-        return globalContext.state.env.darkmode ? "#FFFFFF":"#000000";
-    }
+    
     const tryUpgrade = () => {
         setShowAlert(true);
     }
@@ -99,14 +94,13 @@ const AdRemover:React.FC<Props> = ({route, navigation}) => {
                 totalbuyin : newTotalBuyin,
                 totalbuyin_constant : newTotalBuyin_const
             })
-            .then(()=>{
-                resolve("successfully updated seed")
-            })
+            .then(resolve)
             .catch(reject);
         })
     }
     const _create_history = () => {
         return new Promise((resolve,reject)=>{
+            const time = new Date();
             ref
             .collection("history")
             .add({
@@ -117,12 +111,10 @@ const AdRemover:React.FC<Props> = ({route, navigation}) => {
                 fiat: -1,
                 price: 1,
                 imgsrc: Env.fiatCoinIcon,
-                orderNum: Number(new Date().getTime()).toString().substring(0, 10),
-                time: simplifyDate(new Date())
+                orderNum: time.getTime(),
+                time: time.toLocaleString()
             })
-            .then(()=>{
-                resolve("successfully added history")
-            })
+            .then(resolve)
             .catch(reject);
         })
     }
@@ -140,34 +132,26 @@ const AdRemover:React.FC<Props> = ({route, navigation}) => {
     }
 
     const upgrade = () => {
-        if(prevent_doublePurchase || mainContext.vip){navigation.goBack();return;}
+        if(prevent_doublePurchase || mainContext.user.vip){navigation.goBack();return;}
         if(seed < upgradeCost){console.log("seed not enough : ",seed);onFailUpgrade(I18n.t('p_upgrade.er_2'));return;}
         else{
             setClicked(true);
             triggerUpgrade();
         }
     }
-
-    const simplifyDate = (i:Date) => {
-        let j = i.toString();
-        let k = j.split(" ");
-        let l = k.slice(1, 5);
-        l[3] = l[3].substring(0,5);
-        return l.join(' ');
-    }
     
     return(
         <View style={{flex:1,alignItems:"center",marginTop:15}}>
             <View>
-                <View style={{width: Dimensions.get("window").width-40, height:"auto", padding:5, borderRadius:10, backgroundColor:containerColor(),marginVertical:5}}>
-                    <Text style={{color:textColor(),fontSize:17,fontWeight:"700"}}>{I18n.t('p_upgrade.advantages')}</Text>
-                    <Text style={{color:textColor(),fontSize:15,fontWeight:"500",marginLeft:5}}>- {I18n.t('p_upgrade._1')}</Text>
-                    <Text style={{color:textColor(),fontSize:15,fontWeight:"500",marginLeft:5}}>- {I18n.t('p_upgrade._2_pre')} ({proCommission}%) {I18n.t('p_upgrade._2_suf')}</Text>
-                    <Text style={{color:textColor(),fontSize:17,fontWeight:"700",marginTop:5}}>{I18n.t('p_upgrade.reminder')}</Text>
-                    <Text style={{color:textColor(),fontSize:15,fontWeight:"500",marginLeft:5}}>- {I18n.t('p_upgrade.uc')} : {upgradeCost} VUSD.</Text>
-                    <Text style={{color:textColor(),fontSize:15,fontWeight:"500",marginLeft:5}}>- {I18n.t('p_upgrade._3')}</Text>
-                    <Text style={{color:textColor(),fontSize:15,fontWeight:"500",marginLeft:5}}>- {I18n.t('p_upgrade._4')}</Text>
-                    <Text style={{color:textColor(),fontSize:15,fontWeight:"500",marginLeft:5}}>- {I18n.t('p_upgrade._5')} : {seed} $</Text>
+                <View style={{width: Dimensions.get("window").width-40, height:"auto", padding:5, borderRadius:10, backgroundColor:containerColor(globalContext.state.env.darkmode!),marginVertical:5}}>
+                    <Text style={{color:textColor(globalContext.state.env.darkmode!),fontSize:17,fontWeight:"700"}}>{I18n.t('p_upgrade.advantages')}</Text>
+                    <Text style={{color:textColor(globalContext.state.env.darkmode!),fontSize:15,fontWeight:"500",marginLeft:5}}>- {I18n.t('p_upgrade._1')}</Text>
+                    <Text style={{color:textColor(globalContext.state.env.darkmode!),fontSize:15,fontWeight:"500",marginLeft:5}}>- {I18n.t('p_upgrade._2_pre')} ({proCommission}%) {I18n.t('p_upgrade._2_suf')}</Text>
+                    <Text style={{color:textColor(globalContext.state.env.darkmode!),fontSize:17,fontWeight:"700",marginTop:5}}>{I18n.t('p_upgrade.reminder')}</Text>
+                    <Text style={{color:textColor(globalContext.state.env.darkmode!),fontSize:15,fontWeight:"500",marginLeft:5}}>- {I18n.t('p_upgrade.uc')} : {upgradeCost} VUSD.</Text>
+                    <Text style={{color:textColor(globalContext.state.env.darkmode!),fontSize:15,fontWeight:"500",marginLeft:5}}>- {I18n.t('p_upgrade._3')}</Text>
+                    <Text style={{color:textColor(globalContext.state.env.darkmode!),fontSize:15,fontWeight:"500",marginLeft:5}}>- {I18n.t('p_upgrade._4')}</Text>
+                    <Text style={{color:textColor(globalContext.state.env.darkmode!),fontSize:15,fontWeight:"500",marginLeft:5}}>- {I18n.t('p_upgrade._5')} : {seed} $</Text>
                 </View>
                 <TouchableOpacity disabled={clicked} style={{alignSelf:"center", height: 45, width: Dimensions.get("window").width-40,justifyContent:"center", alignItems:"center",backgroundColor:"#81d466",borderRadius:10}} onPress={()=>tryUpgrade()}>
                     <Text style={{fontSize:17,color:"white",fontWeight:"bold"}}>{I18n.t('upgrade')}</Text>

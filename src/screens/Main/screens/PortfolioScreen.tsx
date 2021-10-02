@@ -12,14 +12,6 @@ import { post_to_portfolio } from '../../../lib/FuncLib';
 import { GlobalContextInterfaceAsReducer, MainContextInterface, Obj, TradingContextInterfaceAsReducer } from '../../../lib/Types';
 
 const Stack = createStackNavigator();
-const globalScreenOptions_dark ={
-    headerTitleStyle: {color:"#FFFFFF"},
-    headerTintColor: "#FFFFFF"
-}
-const globalScreenOptions_light ={
-    headerTitleStyle: {color:"#000000"},
-    headerTintColor: "#000000"
-}
 
 const PortfolioScreen:React.FC = () => {
     const globalContext = useContext<GlobalContextInterfaceAsReducer>(GlobalContext);
@@ -45,17 +37,20 @@ const PortfolioScreen:React.FC = () => {
             return I18n.t('trading')
         }
         if(I18n.currentLocale().includes('en')){
-            return (mainContext.username[mainContext.username.length-1]!=='s')?(mainContext.username+"'s "+I18n.t('portfolio')):(mainContext.username+"' "+I18n.t('portfolio'))
+            return (mainContext.user.username[mainContext.user.username.length-1]!=='s')?(mainContext.user.username+"'s "+I18n.t('portfolio')):(mainContext.user.username+"' "+I18n.t('portfolio'))
         }else if(I18n.currentLocale().includes('fr')){
-            return (mainContext.username[0]!=='a' && mainContext.username[0]!=='o' && mainContext.username[0]!=='e' && mainContext.username[0]!=='i' && mainContext.username[0]!=='u')?(I18n.t('portfolio')+" de "+mainContext.username):(I18n.t('portfolio')+" d'"+mainContext.username)
+            return (mainContext.user.username[0]!=='a' && mainContext.user.username[0]!=='o' && mainContext.user.username[0]!=='e' && mainContext.user.username[0]!=='i' && mainContext.user.username[0]!=='u')?(I18n.t('portfolio')+" de "+mainContext.user.username):(I18n.t('portfolio')+" d'"+mainContext.user.username)
         }else{
-            return (mainContext.username + I18n.t('portfolio'))
+            return (mainContext.user.username + I18n.t('portfolio'))
         }
     }
 
     return (
         <PortfolioContext.Provider value={{portfolio:portfolio}}>
-            <Stack.Navigator initialRouteName="Stack_Portfolio" screenOptions={globalContext.state.env.darkmode ? globalScreenOptions_dark : globalScreenOptions_light}>
+            <Stack.Navigator initialRouteName="Stack_Portfolio" screenOptions={{
+                headerTitleStyle: {color:textColor(globalContext.state.env.darkmode!)},
+                headerTintColor: textColor(globalContext.state.env.darkmode!)
+            }}>
                 <Stack.Screen name='Stack_Portfolio' options={{title:`${dynamicTitle()}`}} component={Portfolio}/>
                 <Stack.Screen name='Stack_History' options={{title:`${I18n.t('history')}`,headerBackTitle:I18n.t('cancel')}} component={HistoryScreen}/>
             </Stack.Navigator>

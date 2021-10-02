@@ -17,8 +17,8 @@ interface Props{
 const Settings:React.FC<Props> = ({navigation}) => {
     const globalContext = useContext<GlobalContextInterfaceAsReducer>(GlobalContext);
     const mainContext = useContext<MainContextInterface>(MainContext);
-    const [switchState_pin, setSwitchState_pin] = useState<boolean>(mainContext.requirePIN);
-    const [switchState_pro, setSwitchState_pro] = useState<boolean>(mainContext.adblock);
+    const [switchState_pin, setSwitchState_pin] = useState<boolean>(mainContext.user.requirePIN);
+    const [switchState_pro, setSwitchState_pro] = useState<boolean>(mainContext.user.adblock);
     const [switchState_darkmode, setSwitchState_darkmode] = useState<boolean|null>(globalContext.state.env.darkmode);
 
     const toggleTheme = (i:boolean):void => {
@@ -38,7 +38,7 @@ const Settings:React.FC<Props> = ({navigation}) => {
             .catch(console.log)
     }
     const toggleAdBlock = (param:boolean):void => {
-        if(!mainContext.vip){
+        if(!mainContext.user.vip){
             navigation.navigate('Stack_Settings_UP');
             setSwitchState_pro(false);
         }else{
@@ -181,7 +181,7 @@ const Settings:React.FC<Props> = ({navigation}) => {
                         />
                     </View>
                     <View>
-                        {mainContext.requirePIN ? (
+                        {mainContext.user.requirePIN ? (
                             <TouchableOpacity onPress={()=>navigation.navigate("Stack_Settings_CP")}>
                                 <View style={{flexDirection:"row",justifyContent:"space-between",alignItems:"center",marginBottom:25}}>
                                     <Text style={{fontSize:17,fontWeight:"300",letterSpacing:0.5,color:textColor(globalContext.state.env.darkmode!)}}>{I18n.t('configure_pin')}</Text>
@@ -276,10 +276,10 @@ const Settings:React.FC<Props> = ({navigation}) => {
     }
 
     return (
-    <View style={{backgroundColor:bgColor(globalContext.state.env.darkmode!),paddingTop:10,height:globalContext.state.env.screenHeight-dynamic_bottom_tab_Height(mainContext.adblock)+10}}>
+    <View style={{backgroundColor:bgColor(globalContext.state.env.darkmode!),height:globalContext.state.env.screenHeight-dynamic_bottom_tab_Height(Boolean(mainContext.user.adblock || mainContext.adEnv.globalAdBlock))}}>
         <View style={{flex:1}}>
             <ScrollView style={{paddingHorizontal: 20}}>
-                <Text style={{fontSize:29,fontWeight:"bold",marginTop:5,color:textColor(globalContext.state.env.darkmode!)}}>{I18n.t('hello')} {mainContext.username}{I18n.t('hello_suf')}</Text>
+                <Text style={{fontSize:29,fontWeight:"bold",marginTop:5,color:textColor(globalContext.state.env.darkmode!)}}>{I18n.t('hello')} {mainContext.user.username}{I18n.t('hello_suf')}</Text>
                 <Text style={{fontSize:14,fontWeight:"500",color:textColor(globalContext.state.env.darkmode!)}}>  {globalContext.state.auth.userEmail}</Text>
                 <Account/>
                 <Security/>

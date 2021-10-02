@@ -9,7 +9,6 @@ import i18n from 'i18n-js';
 import axios from 'axios';
 
 import { GlobalContext, MainContext } from '../../../StateManager';
-import { BannerAD } from '../../../lib/ComponentLib';
 import { GlobalContextInterfaceAsReducer, MainContextInterface } from '../../../lib/Types';
 import * as StyleLib from '../../../lib/StyleLib';
 import { dynamicRound, numberWithCommas } from '../../../lib/FuncLib';
@@ -24,21 +23,15 @@ interface Props {
     navigation: any
 }
 
+const locale = i18n.currentLocale();
+
 const HistoryScreen:React.FC<Props> = ({route, navigation}) => {
     const globalContext = useContext<GlobalContextInterfaceAsReducer>(GlobalContext);
     const mainContext = useContext<MainContextInterface>(MainContext);
     const [history, setHistory] = useState<any[]>([]);
     const [editStatus, setEditStatus] = useState<boolean>(false);
     const [selected, setSelected] = useState<any>([]);
-    const locale = i18n.currentLocale();
-
-    const dynamicMargin = () => {
-        if(mainContext.adblock){
-            return (Platform.OS === "ios") ? 209:162; // previously 209:162 - 23
-        }else{
-            return (Platform.OS === "ios") ? 269:222; // previously 269:222 - 23
-        }
-    }
+    
     const renderFreeIfZero = (i:any):any => {
         return (i>0) ? i : "";
     }
@@ -146,7 +139,6 @@ const HistoryScreen:React.FC<Props> = ({route, navigation}) => {
               { text: i18n.t('yes'), onPress: () => deleteSingle(metadata)}
             ]
           );
-      
     }
     const deleteSelected = () => {
         return new Promise((res) => {
@@ -207,8 +199,8 @@ const HistoryScreen:React.FC<Props> = ({route, navigation}) => {
     }
 
     return(
-        <View style={{marginTop:15,height:globalContext.state.env.screenHeight-StyleLib.dynamic_bottom_tab_Height(mainContext.adblock)-15}}>
-            <View style={{flex:1, width:width, alignSelf:"center",borderWidth:2,borderRadius:8,borderColor:StyleLib.containerRadiusColor_bis(globalContext.state.env.darkmode!),backgroundColor:StyleLib.containerColor_bis(globalContext.state.env.darkmode!),marginBottom:2}}>
+        <View style={{height:globalContext.state.env.screenHeight-StyleLib.dynamic_bottom_tab_Height(Boolean(mainContext.user.adblock || mainContext.adEnv.globalAdBlock))}}>
+            <View style={{flex:1, width:width, alignSelf:"center",borderWidth:2,borderRadius:8,borderColor:StyleLib.containerRadiusColor_bis(globalContext.state.env.darkmode!),backgroundColor:StyleLib.containerColor_bis(globalContext.state.env.darkmode!),marginVertical:10}}>
                 <FlatList
                     style={[{borderRadius: 6},(Platform.OS !== 'ios') && {paddingHorizontal:4,paddingVertical:4}]}
                     data={history}

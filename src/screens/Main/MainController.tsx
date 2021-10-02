@@ -2,7 +2,7 @@ import React, { useEffect, useState, useContext, useReducer } from 'react'
 import { GlobalContext, MainContext, TradingContext } from '../../StateManager';
 import { DocumentSnapshot } from '@firebase/firestore-types'
 import * as StyleLib from '../../lib/StyleLib';
-import { GlobalContextInterfaceAsReducer } from '../../lib/Types';
+import { AD_controller, GlobalContextInterfaceAsReducer, UserSnapshot } from '../../lib/Types';
 import { StyleSheet, View, Platform, Text, TextInput, TouchableOpacity, Alert, ImageBackground } from 'react-native';
 import { Image } from 'react-native-elements';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -24,20 +24,9 @@ const Tab = createBottomTabNavigator();
 const MainController:React.FC = () => {
     const globalContext = useContext<GlobalContextInterfaceAsReducer>(GlobalContext);
     const [coinState, coinDispatch] = useReducer(coin_reducer, null);
-    
-    const [loaded, setLoaded] = useState<boolean>(false);
-    const [username, setUsername] = useState<string>('');
-    const [pinCode, setPincode] = useState<string>('');
+  
     const [pinAnswer, setPinAnswer] = useState<string>('');
-    const [requirePIN, setRequirePIN] = useState<boolean>(false);
-    const [seed, setSeed] = useState<number>(0);
-    const [adblock, setAdBlock] = useState(false);
-    const [totalbuyin, setTotalbuyin] = useState<number|null>(null);
-    const [totalbuyin_const, setTotalbuyin_const] = useState<number|null>(null);
-    const [pnldate, setPNLdate] = useState<string>('');
     const [postdata, setPostData] = useState<any[]>([]);
-    const [fav, setFav] = useState<any[]>([]);
-    const [vip, setVIP] = useState<boolean>(false);
     const [processing, setProcessing] = useState<boolean>(false);
     const [fetching, setFetching] = useState<boolean>(false);
     const [fetching_g, setFetching_g] = useState<boolean>(false);
@@ -51,17 +40,9 @@ const MainController:React.FC = () => {
     const [extra, setExtra] = useState<boolean>(false);
     const [usingFullData, setUsingFullData] = useState<boolean>(false);
     const [sentLog, setSentLog] = useState<boolean>(false);
+    const [adEnv, setAdEnv] = useState<AD_controller|null>(null);
 
-    const get_ad_config = () => {
-      db.collection('globalEnv').doc('ad_controller').get().then((doc:DocumentSnapshot)=>{
-        const override = doc.data()!.always_test_banner ?? false;
-        console.log("Main Controller - AD config : banner id test status is : ",override);
-        setBannerID(bannerAdId(override));
-      }).catch((e)=>{
-        console.log("error fetching server ad config because:",e);
-        setBannerID(bannerAdId(true));
-      });
-    }
+    const [user,setUser] = useState<UserSnapshot|null>(null);
 
     const _getAPI = (api:string) => {
       return new Promise((resolve,reject)=>{
@@ -76,7 +57,7 @@ const MainController:React.FC = () => {
 
     const handlePinAnswer = (i:string) => {
       setPinAnswer(i);
-      if(!pinValidated && i===pinCode){
+      if(!pinValidated && i===user?.pin){
         setPinValidated(true);
       }
     }
@@ -122,6 +103,12 @@ const MainController:React.FC = () => {
     }
     const setPriceData = (_res:any) => {
       let _arr = [..._res[0],..._res[1],..._res[2],..._res[3]];
+      let _celo = _arr.find((i) => i.symbol ==="celo");
+      let celo = {..._celo}
+      if(celo){
+        celo.name = 'Feel coin';celo.symbol = 'FEEL';celo.image = Env.feelcoinIcon;celo.id='feel';
+        _arr.push(celo);
+      }
       setCoindata(_arr);
     }
     const setGlobalData = (_res:any) => {
@@ -133,7 +120,7 @@ const MainController:React.FC = () => {
       }else{
         setFetching_g(true);
       }
-      const baseapi_global = "https://baseapi_global";
+      const baseapi_global = "https://api.redacted";
       axios
         .get(baseapi_global)
         .then((res)=>{
@@ -147,7 +134,7 @@ const MainController:React.FC = () => {
         })
     }
     const baseapi = (page:number,extended?:boolean):string => {
-      return `https://baseapi&page=${page}${(usingFullData||extended)&&'&price_change_percentage=1h%2C7d%2C14d%2C30d%2C200d%2C1y'}`
+      return `https://api.redacted'}`
     }
     const updatePriceData = (extended?:boolean) => {
       if(fetching){
@@ -232,13 +219,30 @@ const MainController:React.FC = () => {
         updatePriceData();
         updateGlobalData();
       }
-      if(Env.Test_ads){
-        setBannerID(bannerAdId(true));
-      }else{
-        get_ad_config();
-      }
       const dbRef = rdb.ref('coins'); // deprecated due to expensive costs
       const dbRef_g = rdb.ref('global'); // deprecated due to expensive costs
+      const ad_env_snapshot = db.collection('globalEnv').doc('ad_controller').onSnapshot((doc:DocumentSnapshot)=>{
+          const data = doc.data()!;
+          const override = data.always_test_banner ?? false;
+          console.log("Main Controller - AD config : banner id test status is : ",override);
+          if(Env.Test_ads){
+            setBannerID(bannerAdId(true));
+          }else{
+            setBannerID(bannerAdId(override));
+          }
+          setAdEnv({
+            testAD_video:data.always_test ?? false,
+            testAD_banner:data.always_test_banner ?? false,
+            globalAdBlock:data.globalAdBlock ?? false,
+            rewards:{
+              _1:data.video_reward_1 ?? 750,
+              _2:data.video_reward_2 ?? 500,
+              _7:data.video_reward_7 ?? 350,
+              _20:data.video_reward_20 ?? 250,
+              _70:data.video_reward_70 ?? 100,
+            }
+          })
+      })
       const rdb_coins = dbRef.on('value', (snapshot) => {
         if(!fetching && typeof snapshot != "undefined" && !globalContext.state.serverSide.f_c_render){
           const changedPost = snapshot.val();
@@ -268,6 +272,7 @@ const MainController:React.FC = () => {
       return () => {
         rdb_coins;
         rdb_global;
+        ad_env_snapshot();
       }
     }, [extra])
 
@@ -281,24 +286,32 @@ const MainController:React.FC = () => {
               let __override = data.override ?? false;
               if(__override){setVerifiedEmail(__override);}
               set_Override(__override);
-              setPincode(data.pin ?? "");
-              setSeed(data.seed ?? 0);
-              setUsername(data.username ?? "Trader");
-              setRequirePIN(data.requirepin ?? false);
-              setAdBlock(data.pro ?? false);
-              setVIP(data.boughtPro ?? false);
-              setFav(data.favorites ?? Array());
-              setTotalbuyin(data.totalbuyin ?? 0);
-              setTotalbuyin_const(data.totalbuyin_constant ?? 0);
-              setPNLdate(data.pnldate ?? new Date().getTime());
-              setLoaded(true);
+              setUser({
+                vip:data.boughtPro ?? false,
+                fav:data.favorites ?? [],
+                pin:data.pin ?? "",
+                pnldate:data.pnldate ?? new Date().getTime(),
+                adblock:data.pro ?? false,
+                referrals:data.referrals ?? [],
+                requirePIN:data.requirepin ?? false,
+                seed:data.seed ?? 0,
+                totalbuyin:data.totalbuyin ?? 0,
+                totalbuyin_const:data.totalbuyin_constant ?? 0,
+                username:data.username ?? "Trader",
+
+                override:__override,
+                platform:data.platform ?? "unknown",
+                lastActivity:new Date().toUTCString(),
+                referral_code:data.referral_code ?? '',
+                reward_acc:data.reward_acc ?? 0,
+              });
             }else{
               console.log("Tried snapshot but the document does not exist");
             }
         });
       const unsubscribe_wallet = query.onSnapshot((qs)=>{
           let postData_local:any[] = [];
-          qs.forEach((doc) => {
+          qs.forEach((doc:any) => {
             postData_local.push({ ...doc.data(), id: doc.id });
             // removed { ... symbol:doc.data().symbol ?? doc.id} cause there is already a symbol fetched from the server
             // doc.data() is never undefined for query doc snapshots
@@ -310,13 +323,13 @@ const MainController:React.FC = () => {
         unsubscribe_user();
         unsubscribe_wallet();
       }
-    }, [globalContext,extra])//seed,coindata,totalbuyin,totalbuyin_const are not needed cause it is an event listener. it only depends on the userEmail.
+    }, [globalContext,extra])
 
     useEffect(() => {
       if(forceRerender){setForceRerender(false);console.log("force rerender")}
     }, [forceRerender])
 
-    if(!loaded || verifiedEmail === null || bannerID === null || !coindata || !changedata){
+    if(user === null || verifiedEmail === null || bannerID === null || !coindata || !changedata || adEnv === null){
       return(
         <LoadingScreen reloadable={true} reload={()=>reloadAll(true)}/>
       )
@@ -324,7 +337,7 @@ const MainController:React.FC = () => {
 
     if(!_override && verifiedEmail === false){
       return(
-        <WelcomeScreen username={username} email={globalContext.state.auth.userEmail!}/>
+        <WelcomeScreen username={user.username} email={globalContext.state.auth.userEmail!}/>
       )
     }
 
@@ -346,7 +359,7 @@ const MainController:React.FC = () => {
                 style={{width:40,height:40,marginBottom:5,}}
                 />
             </View>
-            <Text style={[{color:"#FFFFFF",fontSize:24,fontWeight:"bold",textShadowColor:StyleLib.brandColor(globalContext.state.env.darkmode!),textShadowOffset:{width: 1, height: 1},textShadowRadius:4},(Platform.OS === 'ios') && {marginTop:5}]}>{i18n.t('hello')}{username}{i18n.t('hello_suf')}</Text>
+            <Text style={[{color:"#FFFFFF",fontSize:24,fontWeight:"bold",textShadowColor:StyleLib.brandColor(globalContext.state.env.darkmode!),textShadowOffset:{width: 1, height: 1},textShadowRadius:4},(Platform.OS === 'ios') && {marginTop:5}]}>{i18n.t('hello')}{user.username}{i18n.t('hello_suf')}</Text>
             <View style={{width:300, alignItems:"center",marginTop:50}}>
               <TextInput
                   style={[styles.input,{backgroundColor: 'rgba(0,0,0,0.25)'}]}
@@ -459,7 +472,7 @@ const MainController:React.FC = () => {
         dispatch:coinDispatch
       }}>
         {body}
-        <BannerAD adblock={adblock} bannerID={bannerID} errorCallback={adError} noMargin={Boolean(coinState)}/>
+        <BannerAD adblock={Boolean(user.adblock || adEnv?.globalAdBlock)} bannerID={bannerID} errorCallback={adError} noMargin={Boolean(coinState)}/>
       </TradingContext.Provider>
     )
 
@@ -468,22 +481,15 @@ const MainController:React.FC = () => {
         rerender:rerenderCallback,
         extend:useAllData,
         reload:reloadAll,
+        adEnv:adEnv,
+        user:user,
         fetching:fetching,
         coindata:coindata,
+        postdata:postdata,
         bannerID:bannerID,
         changedata:changedata,
-        vip:vip,
-        adblock:adblock,
-        requirePIN:requirePIN,
-        username:username,
-        fav:fav,
-        postdata:postdata,
-        pnldate:pnldate,
-        totalbuyin:totalbuyin,
-        totalbuyin_const:totalbuyin_const,
-        seed:seed
       }}>
-      {(requirePIN && pinAnswer!==pinCode && !pinValidated) ? (securityScreen):((forceRerender) ? (<LoadingScreen reloadable={true} reload={()=>reloadAll(true)}/>):(wrapper))}
+      {(user.requirePIN && pinAnswer!==user.pin && !pinValidated) ? (securityScreen):((forceRerender) ? (<LoadingScreen reloadable={true} reload={()=>reloadAll(true)}/>):(wrapper))}
       </MainContext.Provider>
     )
 }

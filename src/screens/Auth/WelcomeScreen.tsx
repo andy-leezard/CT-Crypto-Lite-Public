@@ -20,22 +20,36 @@ const WelcomeScreen:React.FC<Props> = ({username, email}) => {
     
     useEffect(() => {
         db.collection('globalEnv').doc('variables').get().then((doc:DocumentSnapshot)=>{
-            (doc.exists) ? setStartingBonus(doc.data()!.starting_bonus) : setStartingBonus(1000);
+            (doc.exists) ? setStartingBonus(doc.data()!.starting_bonus ?? 1000) : setStartingBonus(1000);
         }).catch(()=>{setStartingBonus(1000);});
     }, [])
 
+    const single_alert = (title:string,message:string) => {
+        Alert.alert(
+            title,message,
+        [{ text: I18n.t('ok'),}]
+        );
+    }
+
+    const handleError = (e:any) => {
+        const errorCode = e.code;
+        console.log(errorCode);
+        if(errorCode == "auth/too-many-requests"){
+            single_alert(I18n.t('error'),I18n.t('case4'));
+        }else{
+            single_alert(I18n.t('error'),I18n.t('p_upgrade.er_1'));
+        }
+    }
+
     const resend = ():void => {
         if(auth.currentUser){
-            auth.currentUser.sendEmailVerification();
-            Alert.alert(
-                I18n.t('p_welcome.mail_verif'),(I18n.t('p_welcome.mail_verif_msg') + " : "+auth.currentUser.email),
-            [{ text: I18n.t('ok'),}]
-            );
+            let mail = auth.currentUser.email!;
+            auth.currentUser.sendEmailVerification()
+            .then(()=>{
+                single_alert(I18n.t('p_welcome.mail_verif'),(I18n.t('p_welcome.mail_verif_msg') + " : "+mail));
+            }).catch(handleError);
         }else{
-            Alert.alert(
-                I18n.t('error'),(I18n.t('p_upgrade.er_1')),
-            [{ text: I18n.t('ok'),}]
-            );
+            single_alert(I18n.t('error'),I18n.t('p_upgrade.er_1'));
         }
     }
     const BonusMessage = ():JSX.Element => {

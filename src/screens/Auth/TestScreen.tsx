@@ -15,6 +15,7 @@ const TestScreen:React.FC<Props> = ({ _arr }) => {
     const [redoInfo, setRedoInfo] = useState<boolean>(false);
     const [msg_error, setmsg_error] = useState<string>('Incorrect information');
     const [processing, setProcessing] = useState<boolean>(false);
+    const [secondary, setSecondary] = useState<string>('');
 
     const localTest = () => {
         setProcessing(true);
@@ -67,18 +68,15 @@ const TestScreen:React.FC<Props> = ({ _arr }) => {
     const testAPI = async ():Promise<void> => {
         const withBody = Boolean(email.length>0);
         //localTest();
-        //const function_address = 'https://us-central1-project.cloudfunctions.net/deleteuser';
-        //const function_address = 'https://us-central1-project.cloudfunctions.net/optimizeHistory';
-        //const function_address = 'https://us-central1-project.cloudfunctions.net/whatsMyPIN';
-        //const function_address = 'https://us-central1-project.cloudfunctions.net/pushCoinData';
-        const function_address = 'https://us-central1-project.cloudfunctions.net/testHTTP';
+        const function_address = 'redacted';
         setProcessing(true);
-        const body = withBody ? { userEmail: email }:{}
+        const body = withBody ? { userEmail: email, referralEmail: secondary }:{}
         try {
             //const response:any = await fetch(function_address, { method:"POST", body: JSON.stringify(body) })
             const response = await axios.post(function_address, body)
             // response is an object
             console.log(response.data);
+            handleError(response.data);
         }catch(error){
             console.log("Error occurred while testing API");handleError(error);
         }finally{
@@ -105,12 +103,21 @@ const TestScreen:React.FC<Props> = ({ _arr }) => {
                         <Text style={{color:"#ffffff",fontSize:15,fontWeight:"700"}}>{msg_error}</Text>
                     </View>)}
                     <TextInput
-                        style={[styles.input,styles.darkTheme]}
+                        style={[styles.input,styles.lightTheme]}
                         autoFocus={true}
                         placeholder="Email"
                         placeholderTextColor={subTextColor(true)}
                         value={email}
                         onChangeText={setEmail}
+                        maxLength = {32}
+                    />
+                    <TextInput
+                        style={[styles.input,styles.lightTheme]}
+                        autoFocus={true}
+                        placeholder="Referral"
+                        placeholderTextColor={subTextColor(true)}
+                        value={secondary}
+                        onChangeText={setSecondary}
                         maxLength = {32}
                     />
                 </View>

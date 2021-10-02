@@ -49,7 +49,7 @@ const Trading:React.FC = () => {
         const timeframes = [{val:"1"},{val:"7"},{val:"14"},{val:"30"},{val:"90"},{val:"180"},{val:"365"},{val:"max"}];
         const getCandles = () => {
             const _scope = scope;
-            const id = url;
+            const id = (url !== 'feel') ? url:'celo';
             if(!_scope){_scope = 1;}
             axios.get(`https://api.coingecko.com/api/v3/coins/${id}/ohlc?vs_currency=usd&days=${scope}`)
             .then((result)=>{
@@ -81,8 +81,8 @@ const Trading:React.FC = () => {
         interval *= 86400;
         const ago = Math.round(new Date((rightnow-interval)*1000).getTime()/1000);
         const currency = 'usd';
-        const id = tradingContext.state?.id;
-        axios.get(`https://api/${id}/currency=${currency}&from=${ago}&to=${rightnow}`)
+        const id = (tradingContext.state?.id === 'feel') ? 'celo':tradingContext.state?.id;
+        axios.get(`https://redacted/api/v3/coins/${id}/market_chart/range?vs_currency=${currency}&from=${ago}&to=${rightnow}`)
         .then((result)=>{
             let res = result.data.prices;
             let only_prices = [];
@@ -111,7 +111,7 @@ const Trading:React.FC = () => {
     }
 
     const _openURL = () => {
-        Linking.openURL(`https://coinmarketcap.com/currencies/${tradingContext.state?.id}`);
+        (tradingContext.state?.id==="feel") ? Linking.openURL(Env.feelcoinUrl):Linking.openURL(`https://coinmarketcap.com/currencies/${tradingContext.state?.id}`);
     }
 
     const setTradingIntervalFilter = (i:string) => {
@@ -132,7 +132,7 @@ const Trading:React.FC = () => {
     }
 
     const toggleRegisterFavorite = async(name:string) => {
-        let tempo = [...mainContext.fav];
+        let tempo = [...mainContext.user.fav];
         (isInList(tempo,name)) ? tempo = removeFromArray(tempo,name) : tempo.push(name);
         await db.collection('users').doc(globalContext.state.auth.userEmail!).update({favorites: tempo,});
     }
@@ -268,8 +268,8 @@ const Trading:React.FC = () => {
                 <View>
                 <TouchableOpacity 
                     onPress={()=>toggleRegisterFavorite(tradingContext.state!.name)}
-                    style={[{width:24,height:24,borderRadius:5,borderWidth:2,justifyContent:"center",alignItems:"center",marginRight:10},isInList(mainContext.fav,tradingContext.state!.name)?{borderColor:"#BCAB34"}:{borderColor:"#519ABA"}]}>
-                {isInList(mainContext.fav,tradingContext.state!.name) ? (
+                    style={[{width:24,height:24,borderRadius:5,borderWidth:2,justifyContent:"center",alignItems:"center",marginRight:10},isInList(mainContext.user.fav,tradingContext.state!.name)?{borderColor:"#BCAB34"}:{borderColor:"#519ABA"}]}>
+                {isInList(mainContext.user.fav,tradingContext.state!.name) ? (
                 <Image
                     source={require("../assets/icons/1x/star2.png")}
                     style={{width:18,height:18,tintColor:"#BCAB34"}}

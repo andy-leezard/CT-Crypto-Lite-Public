@@ -20,21 +20,25 @@ const Reset_PW_Screen:React.FC<Props> = ({ navigation }) => {
     const displayError = (msg:string):void => {
         setRedoInfo(true);setmsg_error(msg);
     }
-    const handleError = (e:any):void => {
+
+    const handleError = (e:any) => {
         const errorCode = e.code;
         console.log(errorCode);
-        if(errorCode == "auth/invalid-email"){
-            displayError(i18n.t('case1'));
-        }else if(errorCode == "auth/user-not-found"){
-            displayError(i18n.t('case3'));
-        }else{
-            if(e.message){
-                displayError(e.message);
-            }else{
-                displayError(JSON.stringify(e));
-            }
+        switch(errorCode){
+            case("auth/invalid-email"):
+                displayError(i18n.t('case1'));
+                break;
+            case("auth/user-not-found"):
+                displayError(i18n.t('case3'));
+                break;
+            case("auth/too-many-requests"):
+                displayError(i18n.t('case4'));
+                break;
+            default:
+                displayError(i18n.t('p_upgrade.er_1'));
         }
     }
+
     const resetPW = ():void => {
         const loweremail = email.toLowerCase();
         if(email.length <6 || !isValidEmailAddress(email)){

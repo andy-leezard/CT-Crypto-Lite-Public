@@ -31,24 +31,56 @@ export interface GlobalContextInterfaceAsReducer {
     dispatch:(param:APP_ACTIONTYPE)=>void;
 }
 
+export type UserSnapshot = {
+    vip:boolean;
+    fav:string[];
+    pin:string;
+    pnldate:string|number;
+    adblock:boolean;
+    referrals:string[];
+    requirePIN:boolean;
+    seed:number;
+    totalbuyin:number;
+    totalbuyin_const:number;
+    username:string;
+
+    override?:boolean;
+    platform?:string;
+    lastActivity?:string;
+    referral_code?:string;
+    reward_acc?:number;
+    times_watched_ads?:number;
+}
+
+export type Rewards = {
+    /**
+     * numbers are probabilities
+     */
+    _1: number;
+    _2: number;
+    _7: number;
+    _20: number;
+    _70: number;
+}
+
+export type AD_controller = {
+    testAD_video:boolean;
+    testAD_banner:boolean;
+    globalAdBlock:boolean;
+    rewards:Rewards;
+}
+
 export interface MainContextInterface {
     rerender:()=>void;
     extend:()=>void;
     reload:(all:boolean)=>void;
+    adEnv:AD_controller;
+    user:UserSnapshot;
     fetching:boolean;
     coindata:Coin[];
+    postdata:CT_Wallet[];
     bannerID:string;
     changedata:any;
-    vip:boolean;
-    adblock:boolean;
-    requirePIN:boolean;
-    username:string;
-    postdata:CT_Wallet[];
-    fav:string[];
-    pnldate:string|number;
-    totalbuyin:number;
-    totalbuyin_const:number;
-    seed:number;
 }
 
 export interface TradingContextInterfaceAsReducer {

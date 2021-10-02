@@ -128,7 +128,7 @@ const Portfolio:React.FC<Props> = ({route,navigation}) => {
         return dynamicRound((i.crntPrice/((i.avg_price ?? i.crntPrice))-1)*100,2)
     }
     const toggleRegisterFavorite = async(name:string) => {
-        let tempo = [...mainContext.fav];
+        let tempo = [...mainContext.user.fav];
         (isInList(tempo,name)) ? tempo = removeFromArray(tempo,name) : tempo.push(name);
         await db.collection('users').doc(globalContext.state.auth.userEmail!).update({favorites: tempo,});
     }
@@ -166,7 +166,7 @@ const Portfolio:React.FC<Props> = ({route,navigation}) => {
                             onPress={() => toggleRegisterFavorite(touchedCoin.name)}
                         >
                         <Text style={styles.textStyle}>
-                            {isInList(mainContext.fav,touchedCoin.name)?"Remove from favorites":"Add to favorites"}
+                            {isInList(mainContext.user.fav,touchedCoin.name)?"Remove from favorites":"Add to favorites"}
                         </Text>
                         </Pressable>
                         {!isStableCoin(touchedCoin.name) &&
@@ -189,10 +189,10 @@ const Portfolio:React.FC<Props> = ({route,navigation}) => {
     )
 
     return (
-        <View style={{backgroundColor:StyleLib.bgColor(globalContext.state.env.darkmode!),height:globalContext.state.env.screenHeight-StyleLib.dynamic_bottom_tab_Height(mainContext.adblock)}}>
+        <View style={{backgroundColor:StyleLib.bgColor(globalContext.state.env.darkmode!),height:globalContext.state.env.screenHeight-StyleLib.dynamic_bottom_tab_Height(mainContext.user.adblock)}}>
             <View style={{width:width, borderRadius:10, borderWidth:3, borderColor:StyleLib.containerRadiusColor_bis(globalContext.state.env.darkmode!), backgroundColor:StyleLib.containerColor_bis(globalContext.state.env.darkmode!), padding:10,marginBottom:10,marginTop:10,alignSelf:"center"}}>
                 <TouchableOpacity style={{alignSelf:"center"}} onPress={()=>toggleViewStatus()}>
-                    <Text style={{position:"absolute",alignSelf:"flex-start",color:StyleLib.textColor(globalContext.state.env.darkmode!),fontSize:16,marginBottom:10,fontWeight:"bold",marginLeft:10}}>{i18n.t('tot_value')} : ${conditionalRender(portfolioContext.portfolio.totalAppreciation,0,6)} ({i18n.t('fiat')}:{conditionalRender((dynamicRound((mainContext.seed/portfolioContext.portfolio.totalAppreciation)*100,2)),1,2)}%)</Text>
+                    <Text style={{position:"absolute",alignSelf:"flex-start",color:StyleLib.textColor(globalContext.state.env.darkmode!),fontSize:16,marginBottom:10,fontWeight:"bold",marginLeft:10}}>{i18n.t('tot_value')} : ${conditionalRender(portfolioContext.portfolio.totalAppreciation,0,6)} ({i18n.t('fiat')}:{conditionalRender((dynamicRound((mainContext.user.seed/portfolioContext.portfolio.totalAppreciation)*100,2)),1,2)}%)</Text>
                     <View style={{position:"absolute",alignSelf:"flex-end"}} >
                         <View style={{width:30,height:25,borderRadius:5,backgroundColor:"#CBCBCB",justifyContent:"center",alignItems:"center"}}>
                             {(viewStatus===0) && <Image source={require("../assets/icons/1x/view.png")} style={{width:20,height:20,tintColor:"#40B2AB"}}/>}
@@ -235,9 +235,9 @@ const Portfolio:React.FC<Props> = ({route,navigation}) => {
                                             <Text style={[styles.changetext, viewStatus>1 ? (globalContext.state.env.darkmode? styles.changetext_neutral_dark:styles.changetext_neutral_light):{color:StyleLib.sellColor(globalContext.state.env.darkmode!)}]}>{conditionalRender(portfolioContext.portfolio.pnl_const,1,2)}%</Text>
                                         )}
                                         {(portfolioContext.portfolio.pnl_const>=0) ? (
-                                            <Text style={globalContext.state.env.darkmode? styles.changetext_neutral_dark:styles.changetext_neutral_light}>{viewStatus<1 && "+"} ${conditionalRender(numberWithCommas(dynamicRound(portfolioContext.portfolio.totalAppreciation-mainContext.totalbuyin_const,2)),0,6)}</Text>
+                                            <Text style={globalContext.state.env.darkmode? styles.changetext_neutral_dark:styles.changetext_neutral_light}>{viewStatus<1 && "+"} ${conditionalRender(numberWithCommas(dynamicRound(portfolioContext.portfolio.totalAppreciation-mainContext.user.totalbuyin_const,2)),0,6)}</Text>
                                         ):(
-                                            <Text style={globalContext.state.env.darkmode? styles.changetext_neutral_dark:styles.changetext_neutral_light}>{viewStatus<1 && "-"} ${conditionalRender(numberWithCommas(Math.abs(dynamicRound(portfolioContext.portfolio.totalAppreciation-mainContext.totalbuyin_const,2))),0,6)}</Text>
+                                            <Text style={globalContext.state.env.darkmode? styles.changetext_neutral_dark:styles.changetext_neutral_light}>{viewStatus<1 && "-"} ${conditionalRender(numberWithCommas(Math.abs(dynamicRound(portfolioContext.portfolio.totalAppreciation-mainContext.user.totalbuyin_const,2))),0,6)}</Text>
                                         )}
                                     </View>
                             </View>
@@ -248,7 +248,7 @@ const Portfolio:React.FC<Props> = ({route,navigation}) => {
                                     <Image source={require("../assets/icons/1x/Analytic.png")} style={{width:32,height:32,tintColor:"#40AAF2",marginLeft:3}}/>
                                     <View style={{flexDirection:"column"}}>
                                         <Text style={{fontSize:15,fontWeight:"bold",color:StyleLib.textColor(globalContext.state.env.darkmode!),marginLeft:11}}>{i18n.t('my_dy_pnl')}</Text>
-                                        <Text style={{fontSize:15,fontWeight:"bold",color:StyleLib.subTextColor_ter(globalContext.state.env.darkmode!),marginLeft:11}}>{i18n.t('since_pre')} {(typeof mainContext.pnldate == "number") ? new Date(mainContext.pnldate).toLocaleDateString(i18n.currentLocale()) : mainContext.pnldate} {i18n.t('since_suf')}</Text>
+                                        <Text style={{fontSize:15,fontWeight:"bold",color:StyleLib.subTextColor_ter(globalContext.state.env.darkmode!),marginLeft:11}}>{i18n.t('since_pre')} {(typeof mainContext.user.pnldate == "number") ? new Date(mainContext.user.pnldate).toLocaleDateString(i18n.currentLocale()) : mainContext.user.pnldate} {i18n.t('since_suf')}</Text>
                                     </View>
                                     
                                 </View>
@@ -259,9 +259,9 @@ const Portfolio:React.FC<Props> = ({route,navigation}) => {
                                         <Text style={[styles.changetext, viewStatus>1 ? (globalContext.state.env.darkmode? styles.changetext_neutral_dark:styles.changetext_neutral_light):{color:StyleLib.sellColor(globalContext.state.env.darkmode!)}]}>{conditionalRender(portfolioContext.portfolio.pnl,1,2)}%</Text>
                                     )}
                                     {(portfolioContext.portfolio.pnl>=0) ? (
-                                        <Text style={globalContext.state.env.darkmode? styles.changetext_neutral_dark:styles.changetext_neutral_light}>{viewStatus<1 && "+"} ${conditionalRender(numberWithCommas(dynamicRound(portfolioContext.portfolio.totalAppreciation-mainContext.totalbuyin,2)),0,6)}</Text>
+                                        <Text style={globalContext.state.env.darkmode? styles.changetext_neutral_dark:styles.changetext_neutral_light}>{viewStatus<1 && "+"} ${conditionalRender(numberWithCommas(dynamicRound(portfolioContext.portfolio.totalAppreciation-mainContext.user.totalbuyin,2)),0,6)}</Text>
                                     ):(
-                                        <Text style={globalContext.state.env.darkmode? styles.changetext_neutral_dark:styles.changetext_neutral_light}>{viewStatus<1 && "-"} ${conditionalRender(numberWithCommas(Math.abs(dynamicRound(portfolioContext.portfolio.totalAppreciation-mainContext.totalbuyin,2))),0,6)}</Text>
+                                        <Text style={globalContext.state.env.darkmode? styles.changetext_neutral_dark:styles.changetext_neutral_light}>{viewStatus<1 && "-"} ${conditionalRender(numberWithCommas(Math.abs(dynamicRound(portfolioContext.portfolio.totalAppreciation-mainContext.user.totalbuyin,2))),0,6)}</Text>
                                     )}
                                 </View>
                             </View>
@@ -277,8 +277,8 @@ const Portfolio:React.FC<Props> = ({route,navigation}) => {
                                         </View>
                                     </View>
                                     <View style={{flexDirection:"column", width:((width/2)-15)}}>
-                                        <Text style={{fontSize:15,fontWeight:"bold",color:StyleLib.textColor(globalContext.state.env.darkmode!),marginRight:5,textAlign:"right"}}>${conditionalRender(numberWithCommas(dynamicRound(mainContext.seed,2)),0,6)}</Text>
-                                        <Text style={[globalContext.state.env.darkmode? styles.changetext_neutral_dark:styles.changetext_neutral_light,{fontSize:15,fontWeight:"bold",marginRight:5,textAlign:"right"}]}>{conditionalRender(mainContext.seed,0,6)} VUSD</Text>
+                                        <Text style={{fontSize:15,fontWeight:"bold",color:StyleLib.textColor(globalContext.state.env.darkmode!),marginRight:5,textAlign:"right"}}>${conditionalRender(numberWithCommas(dynamicRound(mainContext.user.seed,2)),0,6)}</Text>
+                                        <Text style={[globalContext.state.env.darkmode? styles.changetext_neutral_dark:styles.changetext_neutral_light,{fontSize:15,fontWeight:"bold",marginRight:5,textAlign:"right"}]}>{conditionalRender(mainContext.user.seed,0,6)} VUSD</Text>
                                 </View>
                             </View>
                         </TouchableOpacity>
@@ -339,7 +339,11 @@ const Portfolio:React.FC<Props> = ({route,navigation}) => {
                 <SwipeablePanel
                 {...panelProps}
                     isActive={isPanelActive}
-                    style={{backgroundColor:StyleLib.containerColor_bis(globalContext.state.env.darkmode!),bottom:-190,paddingBottom:mainContext.adblock ? 100:160}}
+                    style={{
+                        backgroundColor:StyleLib.containerColor_bis(globalContext.state.env.darkmode!),
+                        bottom:-190,
+                        paddingBottom:Boolean(mainContext.user.adblock || mainContext.adEnv.globalAdBlock) ? 100:160
+                    }}
                     closeOnTouchOutside={true}
                     showCloseButton={false}
                     onlyLarge={true}

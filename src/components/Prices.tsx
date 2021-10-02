@@ -115,7 +115,7 @@ const Prices:React.FC = () => {
     }
 
     const toggleRegisterFavorite = async(name:string) => {
-        let tempo = [...mainContext.fav];
+        let tempo = [...mainContext.user.fav];
         (isInList(tempo,name)) ? tempo = removeFromArray(tempo,name) : tempo.push(name);
         await db.collection('users').doc(globalContext.state.auth.userEmail!).update({favorites: tempo,});
     }
@@ -151,7 +151,7 @@ const Prices:React.FC = () => {
     useEffect(() => {
         let finaldata = [...mainContext.coindata]
         if(renderFavorites){
-            finaldata = finaldata.filter(i => mainContext.fav.some((item:any) => item === i.name));
+            finaldata = finaldata.filter(i => mainContext.user.fav.some((item:any) => item === i.name));
         }
         if(keyword.length > 0){
             finaldata = finaldata.filter(i => i.name.toLowerCase().includes(keyword.toLowerCase()) || i.symbol.toLowerCase().includes(keyword.toLowerCase()));
@@ -252,7 +252,7 @@ const Prices:React.FC = () => {
                             <Text style={{color:StyleLib.textColor(globalContext.state.env.darkmode!),fontSize:17,fontWeight:"bold"}}>{coin.symbol.toUpperCase()}</Text>
                         )}
                         <View style={{flexDirection:"row",alignItems:"center"}}>
-                            {isInList(mainContext.fav,coin.name) && (<Image source={require('../assets/icons/1x/star2.png')} style={{height:10,width:10,marginRight:5,tintColor:"#BCAB34"}}/>)}
+                            {isInList(mainContext.user.fav,coin.name) && (<Image source={require('../assets/icons/1x/star2.png')} style={{height:10,width:10,marginRight:5,tintColor:"#BCAB34"}}/>)}
                             <Text style={{color:StyleLib.subTextColor_bis(globalContext.state.env.darkmode!),fontSize:14,fontWeight:"bold"}}>{coin.symbol.toUpperCase()} {(keyword.length>0 || globalContext.state.env.isTablet || viewmode===ViewMode.TOPMOVERS) && `- rank #${coin.market_cap_rank}`}</Text>
                         </View>
                     </View>
@@ -299,7 +299,7 @@ const Prices:React.FC = () => {
                                 onPress={() => toggleRegisterFavorite(touchedCoin.name)}
                             >
                             <Text style={styles.textStyle}>
-                                {isInList(mainContext.fav,touchedCoin.name)?"Remove from favorites":"Add to favorites"}
+                                {isInList(mainContext.user.fav,touchedCoin.name)?"Remove from favorites":"Add to favorites"}
                             </Text>
                             </Pressable>
                             {!isStableCoin(touchedCoin.name) &&
@@ -323,7 +323,7 @@ const Prices:React.FC = () => {
 
     return (
         <>
-        <View style={{backgroundColor:StyleLib.bgColor(globalContext.state.env.darkmode!), height:globalContext.state.env.screenHeight-StyleLib.dynamic_bottom_tab_Height(mainContext.adblock)}}>
+        <View style={{backgroundColor:StyleLib.bgColor(globalContext.state.env.darkmode!), height:globalContext.state.env.screenHeight-StyleLib.dynamic_bottom_tab_Height(mainContext.user.adblock)}}>
             <View style={{paddingHorizontal:14,marginVertical:10}}>
                 <View style={[{flexDirection:"row",alignItems:"center",justifyContent:"center",alignSelf:"center"},Platform.OS === 'android' && {width:screenWidth-30,height:22}]}>
                     {Platform.OS === 'android' &&
@@ -400,7 +400,11 @@ const Prices:React.FC = () => {
             <SwipeablePanel
                 {...panelProps}
                 isActive={isPanelActive}
-                style={{backgroundColor:StyleLib.containerColor_bis(globalContext.state.env.darkmode!),bottom:-100,paddingBottom:mainContext.adblock ? 100:160}}
+                style={{
+                    backgroundColor:StyleLib.containerColor_bis(globalContext.state.env.darkmode!),
+                    bottom:-100,
+                    paddingBottom:Boolean(mainContext.user.adblock || mainContext.adEnv.globalAdBlock) ? 100:160
+                }}
                 closeOnTouchOutside={true}
                 showCloseButton={false}
                 onlyLarge={true}

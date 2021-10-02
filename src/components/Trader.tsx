@@ -3,7 +3,8 @@ import { View, Text, Image, StyleSheet, TouchableOpacity, Dimensions, TextInput,
 import { db } from '../../firebase';
 import { Button } from 'react-native-elements';
 import Slider from "@react-native-community/slider";
-import AdMobRewardedComponent from './AdMobRewardedComponent';
+//import AdMobRewardedComponent from './AdMobRewardedComponent';
+import AdMobRewardedFC from './AdMobRewardedFC';
 import * as StoreReview from 'expo-store-review';
 import stablecoins from '../stablecoins.json';
 import i18n from 'i18n-js';
@@ -91,7 +92,7 @@ const Trader:React.FC<Props> = ({coinname,coinprice,coinsymbol,coinIcon}) => {
         globalContext.state.env.darkmode ? setActionColor(actionColors.BUY.DARK):setActionColor(actionColors.BUY.LIGHT);
         db.collection('globalEnv').doc("commission").get().then((doc:DocumentSnapshot)=> {
             if(doc.exists){
-                mainContext.vip ? setCommission_Percentage(doc.data()!.as_percentage_pro):setCommission_Percentage(doc.data()!.as_percentage_default);
+                mainContext.user.vip ? setCommission_Percentage(doc.data()!.as_percentage_pro):setCommission_Percentage(doc.data()!.as_percentage_default);
             }else{
                 console.log("Warning - globalEnv collection not found in db !");
             }
@@ -112,7 +113,7 @@ const Trader:React.FC<Props> = ({coinname,coinprice,coinsymbol,coinIcon}) => {
                 let _appre = data.appre ?? 0;
                 setquantity(_quantity);
                 setAppreciation(_appre);
-                if(unitmode===unitmodes.FIAT){setLimit(mainContext.seed);}else{setLimit(_quantity);}
+                if(unitmode===unitmodes.FIAT){setLimit(mainContext.user.seed);}else{setLimit(_quantity);}
                 console.log("Document data:", _quantity);
             }else{// doc.data() will be undefined in this case
                 stablecoins.some(item => item.name === coinname) && stableCoinAlert();
@@ -143,7 +144,7 @@ const Trader:React.FC<Props> = ({coinname,coinprice,coinsymbol,coinIcon}) => {
     }
 
     const regardingCommissionFees = () => {
-        mainContext.vip ? Alert.alert(
+        mainContext.user.vip ? Alert.alert(
             i18n.t('settings_vip'),i18n.t('notif_alrdy_vip'),
         [{ text: i18n.t('cool')}]
         ):Alert.alert(
@@ -301,7 +302,7 @@ const Trader:React.FC<Props> = ({coinname,coinprice,coinsymbol,coinIcon}) => {
             return;
         }
         if(action===actions.BUY){
-            let tempseed = dynamicRound(mainContext.seed*i,2);
+            let tempseed = dynamicRound(mainContext.user.seed*i,2);
             if(buyPrice<=0){//security
                 setActionQuantity_crypto(0);
                 return;
@@ -324,7 +325,7 @@ const Trader:React.FC<Props> = ({coinname,coinprice,coinsymbol,coinIcon}) => {
                 setActionQuantity_fiat(0);
                 return;
             }
-            let tempfiat = dynamicRound(mainContext.seed*i,2);
+            let tempfiat = dynamicRound(mainContext.user.seed*i,2);
             setActionQuantity_fiat(tempfiat);
         }else{
             let tempquantity = dynamicRound(quantity*i,8);
@@ -347,7 +348,7 @@ const Trader:React.FC<Props> = ({coinname,coinprice,coinsymbol,coinIcon}) => {
                 setActionQuantity(0);setActionQuantity_str("");setActionQuantity_crypto(0);setActionQuantity_fiat(0);
                 return;
             }
-            let tempfiat = dynamicRound(mainContext.seed*param,2);
+            let tempfiat = dynamicRound(mainContext.user.seed*param,2);
             setActionQuantity_fiat(tempfiat);
             let tempcrypto = dynamicRound((tempfiat/buyPrice),8);
             setActionQuantity_crypto(tempcrypto);
@@ -388,7 +389,7 @@ const Trader:React.FC<Props> = ({coinname,coinprice,coinsymbol,coinIcon}) => {
         else{globalContext.state.env.darkmode ? setActionColor(actionColors.SELL.DARK):setActionColor(actionColors.SELL.LIGHT);}
         setAction(i);setPercentage(0);setActionQuantity(0);setActionQuantity_str("");
         setActionQuantity_fiat(0);setActionQuantity_crypto(0);
-        updateLimit(mainContext.seed,quantity,i,unitmode);
+        updateLimit(mainContext.user.seed,quantity,i,unitmode);
     }
 
     const setUnitFilter = (i:string) => {
@@ -406,8 +407,8 @@ const Trader:React.FC<Props> = ({coinname,coinprice,coinsymbol,coinIcon}) => {
         if(actionQuantity_str === ""){return;}
         if(action===actions.BUY){
             if(i===unitmodes.FIAT){
-                setLimit(mainContext.seed);
-                let temp = dynamicRound(mainContext.seed *percentage,2);
+                setLimit(mainContext.user.seed);
+                let temp = dynamicRound(mainContext.user.seed *percentage,2);
                 setActionQuantity(temp);
                 setActionQuantity_fiat(temp);
                 setActionQuantity_str(temp.toString());
@@ -419,7 +420,7 @@ const Trader:React.FC<Props> = ({coinname,coinprice,coinsymbol,coinIcon}) => {
                     setActionQuantity_crypto(0);
                     setActionQuantity_fiat(0);
                 }else{
-                    let temp = dynamicRound(mainContext.seed/buyPrice,8);
+                    let temp = dynamicRound(mainContext.user.seed/buyPrice,8);
                     setLimit(temp);
                     let temp2 = dynamicRound(temp*percentage,8);
                     setActionQuantity(temp2);
@@ -526,7 +527,7 @@ const Trader:React.FC<Props> = ({coinname,coinprice,coinsymbol,coinIcon}) => {
 
     const _updateSeed = (modifier:number) => {
         return new Promise((resolve,reject)=>{
-            let newSeed = dynamicRound(mainContext.seed + modifier,2);
+            let newSeed = dynamicRound(mainContext.user.seed + modifier,2);
             ref.update({seed:newSeed})
             .then(()=>{
                 console.log("successfully updated seed quantity as : ", newSeed);
@@ -622,11 +623,11 @@ const Trader:React.FC<Props> = ({coinname,coinprice,coinsymbol,coinIcon}) => {
                     <Text style={{fontSize:15,fontWeight:"bold",color:StyleLib.textColor(globalContext.state.env.darkmode!),marginLeft:10}}>{i18n.t('my_wallet_pre')} VUSD {i18n.t('my_wallet_suf')}</Text>
                 </View>
                 <View style={{flexDirection:"column", width:((width/2)-15)}}>
-                    <Text style={{fontSize:15,fontWeight:"bold",color:StyleLib.textColor(globalContext.state.env.darkmode!),marginRight:5,textAlign:"right"}}>${numberWithCommas(mainContext.seed)}</Text>
-                    <Text style={{fontSize:15,fontWeight:"bold",color:StyleLib.subTextColor_ter(globalContext.state.env.darkmode!),marginRight:5,textAlign:"right"}}>= {dynamicRound((mainContext.seed/coinprice),2)} {coinsymbol}</Text>
+                    <Text style={{fontSize:15,fontWeight:"bold",color:StyleLib.textColor(globalContext.state.env.darkmode!),marginRight:5,textAlign:"right"}}>${numberWithCommas(mainContext.user.seed)}</Text>
+                    <Text style={{fontSize:15,fontWeight:"bold",color:StyleLib.subTextColor_ter(globalContext.state.env.darkmode!),marginRight:5,textAlign:"right"}}>= {dynamicRound((mainContext.user.seed/coinprice),2)} {coinsymbol}</Text>
                 </View>
             </View>
-            {<AdMobRewardedComponent user={globalContext.state.auth.userEmail} width={width} show_text={true}/>}
+            {<AdMobRewardedFC width={width} show_text={true}/>}
             <View style={{flexDirection:"row",justifyContent:"space-between",backgroundColor:StyleLib.containerColor_quinquies(globalContext.state.env.darkmode!),borderRadius:5,width:width,marginBottom:5,height:35}}>
                 {actionListTab.map((e,index) => (
                 <TouchableOpacity key={index} style={[styles.action_tab, (action===e&&e===actions.SELL)&&{backgroundColor:StyleLib.sellColor(globalContext.state.env.darkmode!)}, (action===e&&e===actions.BUY)&&{backgroundColor:StyleLib.buyColor(globalContext.state.env.darkmode!)}]} onPress={()=>setActionFilter(e)}>

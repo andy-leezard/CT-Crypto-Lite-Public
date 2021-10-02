@@ -15,7 +15,7 @@ import 'react-native-gesture-handler';
 import { Platform, Alert } from 'react-native';
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createStackNavigator } from "@react-navigation/stack";
-import { useColorScheme } from "react-native-appearance"; //AppearanceProvider
+import { useColorScheme } from "react-native-appearance";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import LoadingScreen from './src/screens/Auth/LoadingScreen';
@@ -69,7 +69,7 @@ const App:React.FC = () => {
     if(mail){
       db.collection('users')
         .doc(mail)
-        .update({lastActicity:new Date().toUTCString(),platform:Platform.OS})
+        .update({lastActivity:new Date().toUTCString(),platform:Platform.OS})
         .then(()=>{console.log("APP.JS - user log updated"+new Date().toLocaleString());})
         .catch(()=>{console.log("Error updating timestamp for user :",mail)})
     }
@@ -193,15 +193,6 @@ const App:React.FC = () => {
     )
   }
 
-  if(api_test){
-    return(
-      <GlobalContext.Provider value={{state: appState, dispatch: appDispatch}}>
-        <TestScreen />
-        <StatusBar style={'dark'}/>
-      </GlobalContext.Provider>
-    )
-  }
-
   if(appState.auth.user === null || appState.auth.userEmail === null){
     return(
       <GlobalContext.Provider value={{state: appState, dispatch: appDispatch}}>
@@ -215,6 +206,15 @@ const App:React.FC = () => {
             <Stack.Screen name='PW' component={Reset_PW_Screen}/>
           </Stack.Navigator>
         </NavigationContainer>
+        <StatusBar style={'dark'}/>
+      </GlobalContext.Provider>
+    )
+  }
+
+  if(api_test){
+    return(
+      <GlobalContext.Provider value={{state: appState, dispatch: appDispatch}}>
+        <TestScreen />
         <StatusBar style={'dark'}/>
       </GlobalContext.Provider>
     )
