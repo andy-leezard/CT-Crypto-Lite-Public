@@ -3,7 +3,7 @@ import { Text } from 'react-native'
 import { Picker } from "@react-native-picker/picker"
 import I18n from 'i18n-js'
 import { textColor } from '../../lib/StyleLib'
-import { GlobalContextInterface } from '../../lib/Types'
+import { GlobalContextInterface } from '../../ContextManager'
 
 interface Props {
     datainterval:string

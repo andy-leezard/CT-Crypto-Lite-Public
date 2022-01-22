@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "REDACTED",
+    "firebase_url": "REDACTED",
+    "project_id": "REDACTED",
+    "storage_bucket": "REDACTED"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "REDACTED",
+        "android_client_info": {
+          "package_name": "REDACTED"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "REDACTED",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "REDACTED"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "REDACTED",
+              "client_type": 3
+            },
+            {
+              "client_id": "REDACTED",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "REDACTED"
+              }
+            }
+          ]
+        }
+      },
+      "admob_app_id": "REDACTED"
+    }
+  ],
+  "configuration_version": "1"
+}

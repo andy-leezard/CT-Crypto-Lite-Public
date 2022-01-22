@@ -1,190 +1,233 @@
-import React, {useEffect, useState, useContext} from 'react';
-import { Text, View, TouchableOpacity, Dimensions } from 'react-native';
-import { db } from '../../firebase';
-import AwesomeAlert from 'react-native-awesome-alerts';
-import Env from '../env.json';
-import I18n from 'i18n-js';
-import { GlobalContext, MainContext } from '../StateManager';
-import { GlobalContextInterfaceAsReducer, MainContextInterface } from '../lib/Types';
-import { DocumentSnapshot } from '@firebase/firestore-types'
-import { dynamicRound } from '../lib/FuncLib';
-import { containerColor, textColor } from '../lib/StyleLib';
+import React, { useEffect, useState, useContext, useMemo } from "react"
+import { Text, View, TouchableOpacity, Dimensions, Alert } from "react-native"
+import { db } from "../../firebase"
+import Env from "../env.json"
+import I18n from "i18n-js"
+import {
+  GlobalContext,
+  GlobalContextInterfaceAsReducer,
+  MainContext,
+  MainContextInterface,
+} from "../ContextManager"
+import { DocumentSnapshot } from "@firebase/firestore-types"
+import {
+  dynamicRound,
+  referralDiscountCoefficient,
+  referralsToDiscountRate,
+} from "../lib/FuncLib"
+import { containerColor, textColor } from "../lib/StyleLib"
 
-interface Props{
-    route:any
-    navigation:any
+interface Props {
+  route: any
+  navigation: any
 }
 
-const AdRemover:React.FC<Props> = ({route, navigation}) => {
-    const globalContext = useContext<GlobalContextInterfaceAsReducer>(GlobalContext);
-    const mainContext = useContext<MainContextInterface>(MainContext);
-    const [seed, setSeed] = useState<number>(0);
-    const [totalbuyin, setTotalbuyin] = useState<number>();
-    const [totalbuyin_const, setTotalbuyin_const] = useState<number>();
-    const [clicked, setClicked] = useState<boolean>(false);
-    const [proCommission, setProCommission] = useState<number>(0.3);
-    const [upgradeCost, setUpgradeCost] = useState<number>(0);
-    const [showAlert, setShowAlert] = useState<boolean>(false);
-    const [prevent_doublePurchase, setPrevent] = useState<boolean>(false);
+const AdRemover: React.FC<Props> = ({ route, navigation }) => {
+  const gc = useContext(GlobalContext) as GlobalContextInterfaceAsReducer
+  const mc = useContext(MainContext) as MainContextInterface
+  const [clicked, setClicked] = useState<boolean>(false)
+  const [baseCost, setBaseCost] = useState<number>(80)
+  const [discountRate, setDiscountRate] = useState<number>(0)
 
-    const [alertMessage, setAlertMessage] = useState<string>('');
-    const [alertBtnColorState, setAlertBtnColorState] = useState<boolean>(false);
-
-    const initializeAlert = () => {
-        setShowAlert(false);
-        setAlertBtnColorState(false);
-    }
-    const onFailUpgrade = (message:string) => {
-        setAlertBtnColorState(true);
-        setAlertMessage(message);
-    }
-    const onSucceedUpgrade = () => {
-        setAlertBtnColorState(false);
-    }
-
-    const ref = db.collection('users').doc(globalContext.state.auth.userEmail!);
-    useEffect(() => {
-        initializeAlert();
-        if(mainContext.user.vip){
-            navigation.goBack();
-        }else{
-            db.collection('globalEnv').doc("commission").get()
-            .then((doc:DocumentSnapshot)=> {
-                if(doc.exists){
-                    const data = doc.data()!;
-                    setProCommission(data.as_percentage_pro);
-                    setUpgradeCost(data.upgrade_cost);
-                }else{
-                    navigation.goBack();
-                }
-            }).catch(()=>{navigation.goBack();})
-        }
-        const unsubscribe = ref.onSnapshot((doc:DocumentSnapshot)=>{
-                const data = doc.data()!;
-                setSeed(data.seed);
-                setTotalbuyin(data.totalbuyin);
-                setTotalbuyin_const(data.totalbuyin_constant);
-                setPrevent(data.boughtPro);
-        })
-        return unsubscribe;
-    },[]);
-    
-    const tryUpgrade = () => {
-        setShowAlert(true);
-    }
-    const defaultConfirmBtnText = () => {
-        return prevent_doublePurchase ? I18n.t('cool'):I18n.t('upgrade')
-    }
-    const defaultTitleText = () => {
-        return prevent_doublePurchase ? I18n.t('upgraded'):I18n.t('information')
-    }
-    const defaultMessage = () => {
-        return prevent_doublePurchase ? I18n.t('success_vip'):`${I18n.t('vip_cost')} : ${upgradeCost} VUSD`
-    }
-    const _update = () => {
-        return new Promise((resolve,reject)=>{
-            let newSeed = dynamicRound(seed - upgradeCost,2);
-            let newTotalBuyin = dynamicRound(totalbuyin! - upgradeCost,2);
-            let newTotalBuyin_const = dynamicRound(totalbuyin_const! - upgradeCost,2);
-            ref
-            .update({
-                boughtPro: true,
-                pro: true,
-                seed: newSeed,
-                totalbuyin : newTotalBuyin,
-                totalbuyin_constant : newTotalBuyin_const
-            })
-            .then(resolve)
-            .catch(reject);
-        })
-    }
-    const _create_history = () => {
-        return new Promise((resolve,reject)=>{
-            const time = new Date();
-            ref
-            .collection("history")
-            .add({
-                type: "Spent",
-                target: "VUSD",
-                targetName: "Virtual USD",
-                quantity: upgradeCost,
-                fiat: -1,
-                price: 1,
-                imgsrc: Env.fiatCoinIcon,
-                orderNum: time.getTime(),
-                time: time.toLocaleString()
-            })
-            .then(resolve)
-            .catch(reject);
-        })
-    }
-
-    const triggerUpgrade = () => {
-        Promise.all([_update(),_create_history()])
-            .then(() => {
-                setPrevent(true);
-                onSucceedUpgrade();
-            })
-            .catch((err)=>{
-                onFailUpgrade(I18n.t('p_upgrade.er_1'))
-                console.warn(err);
-            });
-    }
-
-    const upgrade = () => {
-        if(prevent_doublePurchase || mainContext.user.vip){navigation.goBack();return;}
-        if(seed < upgradeCost){console.log("seed not enough : ",seed);onFailUpgrade(I18n.t('p_upgrade.er_2'));return;}
-        else{
-            setClicked(true);
-            triggerUpgrade();
-        }
-    }
-    
-    return(
-        <View style={{flex:1,alignItems:"center",marginTop:15}}>
-            <View>
-                <View style={{width: Dimensions.get("window").width-40, height:"auto", padding:5, borderRadius:10, backgroundColor:containerColor(globalContext.state.env.darkmode!),marginVertical:5}}>
-                    <Text style={{color:textColor(globalContext.state.env.darkmode!),fontSize:17,fontWeight:"700"}}>{I18n.t('p_upgrade.advantages')}</Text>
-                    <Text style={{color:textColor(globalContext.state.env.darkmode!),fontSize:15,fontWeight:"500",marginLeft:5}}>- {I18n.t('p_upgrade._1')}</Text>
-                    <Text style={{color:textColor(globalContext.state.env.darkmode!),fontSize:15,fontWeight:"500",marginLeft:5}}>- {I18n.t('p_upgrade._2_pre')} ({proCommission}%) {I18n.t('p_upgrade._2_suf')}</Text>
-                    <Text style={{color:textColor(globalContext.state.env.darkmode!),fontSize:17,fontWeight:"700",marginTop:5}}>{I18n.t('p_upgrade.reminder')}</Text>
-                    <Text style={{color:textColor(globalContext.state.env.darkmode!),fontSize:15,fontWeight:"500",marginLeft:5}}>- {I18n.t('p_upgrade.uc')} : {upgradeCost} VUSD.</Text>
-                    <Text style={{color:textColor(globalContext.state.env.darkmode!),fontSize:15,fontWeight:"500",marginLeft:5}}>- {I18n.t('p_upgrade._3')}</Text>
-                    <Text style={{color:textColor(globalContext.state.env.darkmode!),fontSize:15,fontWeight:"500",marginLeft:5}}>- {I18n.t('p_upgrade._4')}</Text>
-                    <Text style={{color:textColor(globalContext.state.env.darkmode!),fontSize:15,fontWeight:"500",marginLeft:5}}>- {I18n.t('p_upgrade._5')} : {seed} $</Text>
-                </View>
-                <TouchableOpacity disabled={clicked} style={{alignSelf:"center", height: 45, width: Dimensions.get("window").width-40,justifyContent:"center", alignItems:"center",backgroundColor:"#81d466",borderRadius:10}} onPress={()=>tryUpgrade()}>
-                    <Text style={{fontSize:17,color:"white",fontWeight:"bold"}}>{I18n.t('upgrade')}</Text>
-                </TouchableOpacity>
-            </View>
-            <AwesomeAlert
-                show={showAlert}
-                showProgress={false}
-                title={alertBtnColorState ? 'Error':defaultTitleText()}
-                message={alertBtnColorState ? alertMessage:defaultMessage()}
-                closeOnTouchOutside={true}
-                closeOnHardwareBackPress={true}
-                showCancelButton={!alertBtnColorState && !prevent_doublePurchase}
-                showConfirmButton={true}
-                cancelText="Cancel"
-                confirmText={alertBtnColorState ? 'OK':defaultConfirmBtnText()}
-                confirmButtonColor={alertBtnColorState ? "#DD6B55":"#55ddab"}
-                onDismiss={()=>{
-                    (alertBtnColorState || prevent_doublePurchase) ? navigation.goBack():initializeAlert();
-                }}
-                onCancelPressed={() => {
-                    (alertBtnColorState || prevent_doublePurchase) ? navigation.goBack():initializeAlert();
-                }}
-                onConfirmPressed={() => {
-                    if(alertBtnColorState){
-                        navigation.goBack();
-                    }else{
-                        prevent_doublePurchase ? navigation.goBack():upgrade();
-                    }
-                }}
-            />
-        </View>
+  const ref = db.collection("users").doc(gc.state.auth.userEmail!)
+  useEffect(() => {
+    setDiscountRate(
+      dynamicRound(
+        (1 - referralDiscountCoefficient(mc.user.referrals.length)) * 100,
+        2
+      )
     )
+    if (mc.user.adblock) {
+      navigation.goBack()
+    } else {
+      db.collection("globalEnv")
+        .doc("ad_controller")
+        .get()
+        .then((doc: DocumentSnapshot) => {
+          if (doc.exists) {
+            const data = doc.data()!
+            setBaseCost(data.adblock_subscription_cost)
+          } else {
+            navigation.goBack()
+          }
+        })
+        .catch(() => {
+          navigation.goBack()
+        })
+    }
+  }, [])
+
+  const final_cost = useMemo(() => {
+    return dynamicRound(
+      baseCost * referralsToDiscountRate(mc.user.referrals.length),
+      0
+    )
+  }, [baseCost])
+
+  const _update = () => {
+    return new Promise((resolve, reject) => {
+      let newSeed = dynamicRound(mc.user.seed - final_cost, 2)
+      let newTotalBuyin = dynamicRound(mc.user.totalbuyin! - final_cost, 2)
+      let newTotalBuyin_const = dynamicRound(
+        mc.user.totalbuyin_const! - final_cost,
+        2
+      )
+      ref
+        .update({
+          adblock: true,
+          adblock_activated_at: new Date().getTime(),
+          seed: newSeed,
+          totalbuyin: newTotalBuyin,
+          totalbuyin_constant: newTotalBuyin_const,
+        })
+        .then(resolve)
+        .catch(reject)
+    })
+  }
+  const _create_history = () => {
+    return new Promise((resolve, reject) => {
+      const time = new Date()
+      ref
+        .collection("history")
+        .add({
+          type: "adblock",
+          target: "VUSD",
+          targetName: "Virtual USD",
+          quantity: final_cost,
+          fiat: -1,
+          price: 1,
+          imgsrc: Env.fiatCoinIcon,
+          orderNum: time.getTime(),
+          time: time.toLocaleString(),
+        })
+        .then(resolve)
+        .catch(reject)
+    })
+  }
+
+  const upgrade = async () => {
+    if (mc.user.adblock) {
+      navigation.goBack()
+      return
+    }
+    if (mc.user.seed < final_cost) {
+      Alert.alert(I18n.t("notification"), I18n.t("p_upgrade.er_2"), [
+        { text: I18n.t("ok") },
+      ])
+      return
+    } else {
+      setClicked(true)
+      await Promise.all([_update(), _create_history()])
+      Alert.alert(I18n.t("upgraded"), I18n.t("success_vip"), [
+        { text: I18n.t("ok") },
+      ])
+      navigation.goBack()
+    }
+  }
+
+  return (
+    <View style={{ flex: 1, alignItems: "center", marginTop: 15 }}>
+      <View>
+        <View
+          style={{
+            width: Dimensions.get("window").width - 40,
+            height: "auto",
+            padding: 5,
+            borderRadius: 10,
+            backgroundColor: containerColor(gc.state.env.darkmode!),
+            marginVertical: 5,
+          }}
+        >
+          <Text
+            style={{
+              color: textColor(gc.state.env.darkmode!),
+              fontSize: 17,
+              fontWeight: "700",
+            }}
+          >
+            {I18n.t("p_upgrade.advantages")}
+          </Text>
+          <Text
+            style={{
+              color: textColor(gc.state.env.darkmode!),
+              fontSize: 15,
+              fontWeight: "500",
+              marginLeft: 5,
+            }}
+          >
+            - {I18n.t("p_upgrade._1")}
+          </Text>
+          <Text
+            style={{
+              color: textColor(gc.state.env.darkmode!),
+              fontSize: 17,
+              fontWeight: "700",
+              marginTop: 5,
+            }}
+          >
+            {I18n.t("p_upgrade.uc")}
+          </Text>
+          <Text
+            style={{
+              color: textColor(gc.state.env.darkmode!),
+              fontSize: 15,
+              fontWeight: "600",
+              marginLeft: 5,
+            }}
+          >
+            - {final_cost} VUSD (-{discountRate}% from referrals).
+          </Text>
+          <Text
+            style={{
+              color: textColor(gc.state.env.darkmode!),
+              fontSize: 17,
+              fontWeight: "700",
+              marginTop: 5,
+            }}
+          >
+            {I18n.t("p_upgrade.reminder")}
+          </Text>
+          <Text
+            style={{
+              color: textColor(gc.state.env.darkmode!),
+              fontSize: 15,
+              fontWeight: "500",
+              marginLeft: 5,
+            }}
+          >
+            - {I18n.t("p_upgrade._3")}
+          </Text>
+          <Text
+            style={{
+              color: textColor(gc.state.env.darkmode!),
+              fontSize: 15,
+              fontWeight: "500",
+              marginLeft: 5,
+            }}
+          >
+            - {I18n.t("p_upgrade._4")}
+          </Text>
+        </View>
+        <TouchableOpacity
+          disabled={clicked}
+          style={{
+            alignSelf: "center",
+            height: 45,
+            width: Dimensions.get("window").width - 40,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "#81d466",
+            borderRadius: 10,
+          }}
+          onPress={() => upgrade()}
+        >
+          <Text style={{ fontSize: 17, color: "white", fontWeight: "bold" }}>
+            {I18n.t("p_upgrade.activate_adblock")}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  )
 }
 
 export default AdRemover

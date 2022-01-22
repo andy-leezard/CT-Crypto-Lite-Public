@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "CoinTracer",
-    "slug": "CoinTracer",
-    "version": "1.1.1",
+    "name": "CT Crypto Lite",
+    "slug": "CT Crypto Lite",
+    "version": "1.2.1",
     "orientation": "portrait",
     "icon": "./src/assets/icon.png",
     "splash": {
@@ -29,7 +29,7 @@
     "android": {
       "package": "com.package",
       "userInterfaceStyle": "automatic",
-      "versionCode": 20,
+      "versionCode": 29,
       "adaptiveIcon": {
         "foregroundImage": "./src/assets/adaptive-icon.png",
         "backgroundColor": "#000000"
