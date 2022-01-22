@@ -23,7 +23,7 @@ Officially supports 1000+ cryptocurrencies and a real-time price alert notificat
 <img src="https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/icons%2Ficons8-logo-android-480.png?alt=media&token=d2b8685e-7dc0-43c2-8856-8087b2c2fd52" alt="Android" width="84" height="84">
 </p>
 <p align="center">
-<img src="https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/screenshots%2FAndroid%2F1024x500.jpg?alt=media&token=81720c98-fce7-421b-a962-de63becaa816" alt="Screenshot_1" width="259" height="560">
+<img src="https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/screenshots%2FAndroid%2F1024x500.jpg?alt=media&token=81720c98-fce7-421b-a962-de63becaa816" alt="Screenshot_1" width="768" height="375">
 </p>
 
 # License & intellectual property
