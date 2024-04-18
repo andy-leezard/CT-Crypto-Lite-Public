@@ -1,14 +1,13 @@
-# CT Crypto Lite
+# Intro
 
-CT Crypto Lite (Also formerly named "CoinTracer") is a lightweight cross-platform mobile app for crypto investment simulation built on React Native with Expo framework and published on both AppStore and Google Play by Andy Lee in 2021.
+CT Crypto Lite was a lightweight cross-platform mobile app for crypto investment simulation built on React Native with Expo framework.
 
-# TRY OUT
+The app was published in early 2021 and unpublished in late 2022.
+It had about 100 users from AppStore and Google Play combined.
 
-iOS : https://apps.apple.com/us/app/ct-crypto-lite/id1579682178
+The code was no longer maintained due to lack of time, and I decided to archive it.
 
-Android : https://play.google.com/store/apps/details?id=com.AndyLeeDev.CoinTracer
-
-# READ ME
+# About the repo
 
 This public version repository was published only for CODE-READING and educational & informing purposes of my work on React Native.
 
@@ -17,16 +16,17 @@ Private intellectual assets such as the admin credentials, image assets and the 
 Version: 1.1.3 iOS and 1.2.1 Android (last updated: January 1 2022)
 Officially supports 1000+ cryptocurrencies and a real-time price alert notifications.
 
-<p align="center">
-<img src="https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/icons%2Ficons8-logo-ios-480.png?alt=media&token=7af2735f-f60f-4238-8992-b8ccb4193fe9" alt="iOS" width="84" height="84">
-<img src="https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/icon_rounded.png?alt=media&token=a1fe2684-9fc9-47a4-83bc-57b951289386" alt="Logo" width="96" height="96">
-<img src="https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/icons%2Ficons8-logo-android-480.png?alt=media&token=d2b8685e-7dc0-43c2-8856-8087b2c2fd52" alt="Android" width="84" height="84">
-</p>
-<p align="center">
-<img src="https://firebasestorage.googleapis.com/v0/b/cointracer-2fd86.appspot.com/o/screenshots%2FAndroid%2F1024x500.jpg?alt=media&token=81720c98-fce7-421b-a962-de63becaa816" alt="Screenshot_1" width="768" height="375">
-</p>
+# Stacks
 
-# License & intellectual property
+- React Native (Expo managed workflow)
+- Firebase SDK + cloud functions and firestore
+- TypeScript
+
+# Archive
+
+The following contents are archived texts.
+
+## License & intellectual property
 
 Before viewing my open source code, which is an accomplishment of hard work as a solo developer, please notice the applied license ( GNU Affero General Public License v3.0 ) and the conditions of use below.
 This page ("Terms", "Conditions" or "Disclaimer") sets forth the general guidelines and terms of your ("viewer's" or "user's") use of CT Crypto ("App", "this app" or "Service") created by Andy Lee (hereinafter reffered to as "CT Crypto", "I", "My", "Me", "AndyLeeDev" or "AndyLeezard").
@@ -40,15 +40,15 @@ How to give creadits ? - As long as the origin of the source code (URL of this r
 
 The design of the CT Crypto app along with the texts, scripts, graphics, interactive features and the like created by Andy Lee, as well as the trademarks, service marks and logos contained therein are owned by or licensed to CT Crypto, subject to copyright and other intellectual property rights and international conventions. By viewing or using this application's source code, you agree to abstain from copying, or distribution of any of the Service other than expressly permitted herein, including any use, copying or distribution of posts of your contacts obtained through the Service for any commercial purposes.
 
-# Information
+## Information
 
 This repository which does not, and will not contain some of its original source files for security reasons, as this application is a commercial service. The Admob ID and the Firebase API connecter are therefore not pushed in it. Furthermore, updates will not necessarily be pushed immediately to this repository. The whole point is to share some of its source code for educational and personal purposes.
 
-# Disclaimer
+## Disclaimer
 
 This app does not operate actual cryptocurrency trading services and is built simply and purely for educational & recreational purposes to help people try out simulated cryptocurrency investment.
 
-# Privacy
+## Privacy
 
 To use the Service, you need to create an account. By doing so, you acknowledge that you fully understand and agree with the Terms of use.
 CT Crypto does not knowingly collect any Personal Identifiable Information from anyone.
